@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/jinzhu/copier"
-	"github.com/my1562/userprofile/pkg/database"
-	"github.com/my1562/userprofile/pkg/types"
+	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
 )
 

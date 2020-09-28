@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/my1562/userprofile/pkg/config"
-	"github.com/my1562/userprofile/pkg/dao"
-	"github.com/my1562/userprofile/pkg/types"
+	"github.com/corporateanon/barker/pkg/config"
+	"github.com/corporateanon/barker/pkg/dao"
+	"github.com/corporateanon/barker/pkg/types"
 )
 
 func NewHandler(

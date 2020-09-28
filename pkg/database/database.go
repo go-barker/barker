@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/my1562/userprofile/pkg/config"
-	"github.com/my1562/userprofile/pkg/types"
+	"github.com/corporateanon/barker/pkg/config"
+	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

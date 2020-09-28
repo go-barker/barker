@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/my1562/userprofile/pkg/config"
-	"github.com/my1562/userprofile/pkg/dao"
-	"github.com/my1562/userprofile/pkg/database"
-	"github.com/my1562/userprofile/pkg/server"
+	"github.com/corporateanon/barker/pkg/config"
+	"github.com/corporateanon/barker/pkg/dao"
+	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/server"
 	"go.uber.org/fx"
 )
 

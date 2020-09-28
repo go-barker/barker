@@ -1,6 +1,6 @@
 package dao
 
-import "github.com/my1562/userprofile/pkg/types"
+import "github.com/corporateanon/barker/pkg/types"
 
 type DeliveryDao interface {
 	Take(campaignID int64) (*types.Delivery, *types.Campaign, *types.User, error)
