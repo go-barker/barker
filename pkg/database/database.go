@@ -7,6 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type Bot struct {
+	gorm.Model
+	types.Bot
+	ID int64 `gorm:"primaryKey"`
+}
+
 type User struct {
 	gorm.Model
 	types.User
@@ -34,5 +40,6 @@ func NewDatabase(config *config.Config) (*gorm.DB, error) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Campaign{})
 	db.AutoMigrate(&Delivery{})
+	db.AutoMigrate(&Bot{})
 	return db.Debug(), nil
 }

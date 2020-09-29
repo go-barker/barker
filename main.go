@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/corporateanon/barker/pkg/config"
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/server"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )
 
@@ -26,6 +26,7 @@ func main() {
 			dao.NewUserDaoImplGorm,
 			dao.NewCampaignDaoImplGorm,
 			dao.NewDeliveryDaoImplGorm,
+			dao.NewBotDaoImplGorm,
 			database.NewDatabase,
 		),
 		fx.Invoke(start),

@@ -3,10 +3,11 @@ package server
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/corporateanon/barker/pkg/config"
 	"github.com/corporateanon/barker/pkg/dao"
+	"github.com/corporateanon/barker/pkg/server/middleware"
 	"github.com/corporateanon/barker/pkg/types"
+	"github.com/gin-gonic/gin"
 )
 
 func NewHandler(
@@ -14,11 +15,52 @@ func NewHandler(
 	userDao dao.UserDao,
 	campaignDao dao.CampaignDao,
 	deliveryDao dao.DeliveryDao,
+	botDao dao.BotDao,
 ) *gin.Engine {
 	router := gin.Default()
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{"hello": config.DBConnection})
+	router.POST("/bot", func(c *gin.Context) {
+		bot := &types.Bot{}
+		if err := c.ShouldBindJSON(bot); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		resultingBot, err := botDao.Create(bot)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": resultingBot})
+	})
+
+	//-------------------------------------------
+	botApi := router.Group("/bot/:BotID")
+	botApi.Use(middleware.NewMiddlewareLoadBot(botDao))
+
+	botApi.GET("", func(c *gin.Context) {
+		bot := c.MustGet("Bot")
+		c.JSON(http.StatusOK, gin.H{"data": bot})
+	})
+	//-------------------------------------------
+
+	router.PUT("/bot/:id", func(c *gin.Context) {
+		existingBot := c.MustGet("Bot").(types.Bot)
+
+		bot := &types.Bot{}
+		if err := c.ShouldBindJSON(bot); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		bot.ID = existingBot.ID
+
+		resultingBot, err := botDao.Update(bot)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"data": resultingBot})
 	})
 
 	router.PUT("/user", func(c *gin.Context) {
