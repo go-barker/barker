@@ -55,7 +55,7 @@ func (dao *BotDaoImplGorm) Update(bot *types.Bot) (*types.Bot, error) {
 }
 
 func (dao *BotDaoImplGorm) Get(ID int64) (*types.Bot, error) {
-	botModel := &database.Bot{Bot: types.Bot{ID: ID}}
+	botModel := &database.Bot{ID: ID}
 
 	if err := dao.db.First(botModel).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

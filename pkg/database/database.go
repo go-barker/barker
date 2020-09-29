@@ -1,9 +1,7 @@
 package database
 
 import (
-	"github.com/corporateanon/barker/pkg/config"
 	"github.com/corporateanon/barker/pkg/types"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +14,8 @@ type Bot struct {
 type User struct {
 	gorm.Model
 	types.User
-	ID int64 `gorm:"primaryKey"`
+	TelegramID int64 `gorm:"uniqueIndex:idx_telegram_id_bot_id"`
+	BotID      int64 `gorm:"uniqueIndex:idx_telegram_id_bot_id"`
 }
 
 type Campaign struct {
@@ -32,8 +31,8 @@ type Delivery struct {
 	State      types.DeliveryState `gorm:"index"`
 }
 
-func NewDatabase(config *config.Config) (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open(config.DBConnection), &gorm.Config{})
+func NewDatabase(dialector gorm.Dialector) (*gorm.DB, error) {
+	db, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"context"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/corporateanon/barker/pkg/config"
 	"github.com/corporateanon/barker/pkg/dao"
@@ -28,14 +25,10 @@ func main() {
 			dao.NewDeliveryDaoImplGorm,
 			dao.NewBotDaoImplGorm,
 			database.NewDatabase,
+			database.NewDialectorMySQL,
 		),
 		fx.Invoke(start),
 	)
 
-	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	if err := app.Start(startCtx); err != nil {
-		log.Fatal(err)
-	}
-
+	app.Run()
 }

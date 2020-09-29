@@ -1,9 +1,15 @@
 package types
 
 type User struct {
-	ID          int64 `binding:"required"`
-	FirstName   string
+	//Telegram first name
+	FirstName string
+	//Telegram last name
 	LastName    string
 	DisplayName string
-	UserName    string
+	//Telegram user name (e.g. @foo)
+	UserName string
+	//Telegram ID
+	TelegramID int64
+	//ID of bot which this user belongs to
+	BotID int64
 }

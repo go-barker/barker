@@ -3,9 +3,9 @@ package dao
 import (
 	"errors"
 
-	"github.com/jinzhu/copier"
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -26,8 +26,12 @@ func (dao *UserDaoImplGorm) Put(user *types.User) (*types.User, error) {
 	copier.Copy(userModel, user)
 
 	err := dao.db.Transaction(func(tx *gorm.DB) error {
-		existingUser := &database.User{ID: user.ID}
-		if err := tx.First(existingUser).Error; err != nil {
+		existingUser := &database.User{}
+		if err := tx.Where(
+			"bot_id=? AND telegram_id=?",
+			user.BotID,
+			user.TelegramID,
+		).First(existingUser).Error; err != nil {
 			//Error requesting existing user
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				return err
@@ -41,7 +45,9 @@ func (dao *UserDaoImplGorm) Put(user *types.User) (*types.User, error) {
 			return nil
 		}
 		//A user is found
-		tx.Model(existingUser).Updates(userModel)
+		if err := tx.Model(existingUser).Updates(userModel).Error; err != nil {
+			return err
+		}
 		copier.Copy(resultingUser, existingUser)
 		return nil
 	})
@@ -53,10 +59,10 @@ func (dao *UserDaoImplGorm) Put(user *types.User) (*types.User, error) {
 	return resultingUser, nil
 }
 
-func (dao *UserDaoImplGorm) Get(ID int64) (*types.User, error) {
-	userModel := &database.User{ID: ID}
+func (dao *UserDaoImplGorm) Get(botID int64, telegramID int64) (*types.User, error) {
+	userModel := &database.User{}
 
-	result := dao.db.First(userModel)
+	result := dao.db.Where("bot_id=? AND telegram_id=?", botID, telegramID).First(userModel)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

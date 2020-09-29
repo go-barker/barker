@@ -8,6 +8,7 @@ import (
 	"github.com/corporateanon/barker/pkg/server/middleware"
 	"github.com/corporateanon/barker/pkg/types"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 )
 
 func NewHandler(
@@ -35,72 +36,91 @@ func NewHandler(
 
 	//-------------------------------------------
 	botApi := router.Group("/bot/:BotID")
-	botApi.Use(middleware.NewMiddlewareLoadBot(botDao))
+	{
+		botApi.Use(middleware.NewMiddlewareLoadBot(botDao))
 
-	botApi.GET("", func(c *gin.Context) {
-		bot := c.MustGet("Bot")
-		c.JSON(http.StatusOK, gin.H{"data": bot})
-	})
-	//-------------------------------------------
+		botApi.GET("", func(c *gin.Context) {
+			bot := c.MustGet("Bot")
+			c.JSON(http.StatusOK, gin.H{"data": bot})
+		})
 
-	router.PUT("/bot/:id", func(c *gin.Context) {
-		existingBot := c.MustGet("Bot").(types.Bot)
+		botApi.PUT("", func(c *gin.Context) {
+			existingBot := c.MustGet("Bot").(*types.Bot)
 
-		bot := &types.Bot{}
-		if err := c.ShouldBindJSON(bot); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+			bot := &types.Bot{}
+			if err := c.ShouldBindJSON(bot); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
 
-		bot.ID = existingBot.ID
+			bot.ID = existingBot.ID
 
-		resultingBot, err := botDao.Update(bot)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+			resultingBot, err := botDao.Update(bot)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 
-		c.JSON(http.StatusOK, gin.H{"data": resultingBot})
-	})
+			c.JSON(http.StatusOK, gin.H{"data": resultingBot})
+		})
 
-	router.PUT("/user", func(c *gin.Context) {
-		user := &types.User{}
-		if err := c.ShouldBindJSON(user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+		botApi.PUT("/user", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
 
-		resultingUser, err := userDao.Put(user)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+			type UserRequest struct {
+				FirstName   string
+				LastName    string
+				DisplayName string
+				UserName    string
+				TelegramID  int64 `binding:"required"`
+				BotID       int64
+			}
 
-		c.JSON(http.StatusOK, gin.H{"data": resultingUser})
-	})
+			userRequest := &UserRequest{}
+			if err := c.ShouldBindJSON(userRequest); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			userRequest.BotID = bot.ID
 
-	router.GET("/user/:id", func(c *gin.Context) {
-		urlParams := &struct {
-			ID int64 `uri:"id"`
-		}{}
-		if err := c.ShouldBindUri(urlParams); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+			user := &types.User{}
+			copier.Copy(user, userRequest)
 
-		user, err := userDao.Get(urlParams.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+			resultingUser, err := userDao.Put(user)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 
-		if user == nil {
-			c.JSON(http.StatusNotFound, nil)
-			return
-		}
+			c.JSON(http.StatusOK, gin.H{"data": resultingUser})
+		})
 
-		c.JSON(http.StatusOK, gin.H{"data": user})
-	})
+		botApi.GET("/user/:TelegramID", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+
+			params := &struct {
+				TelegramID int64 `uri:"TelegramID"`
+			}{}
+			if err := c.ShouldBindUri(params); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			user, err := userDao.Get(bot.ID, params.TelegramID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			if user == nil {
+				c.JSON(http.StatusNotFound, nil)
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"data": user})
+		})
+
+	}
 
 	router.POST("/campaign", func(c *gin.Context) {
 		campaign := &types.Campaign{}
