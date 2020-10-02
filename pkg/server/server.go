@@ -35,16 +35,16 @@ func NewHandler(
 	})
 
 	//-------------------------------------------
-	botApi := router.Group("/bot/:BotID")
+	botRouter := router.Group("/bot/:BotID")
 	{
-		botApi.Use(middleware.NewMiddlewareLoadBot(botDao))
+		botRouter.Use(middleware.NewMiddlewareLoadBot(botDao))
 
-		botApi.GET("", func(c *gin.Context) {
+		botRouter.GET("", func(c *gin.Context) {
 			bot := c.MustGet("Bot")
 			c.JSON(http.StatusOK, gin.H{"data": bot})
 		})
 
-		botApi.PUT("", func(c *gin.Context) {
+		botRouter.PUT("", func(c *gin.Context) {
 			existingBot := c.MustGet("Bot").(*types.Bot)
 
 			bot := &types.Bot{}
@@ -64,7 +64,7 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": resultingBot})
 		})
 
-		botApi.PUT("/user", func(c *gin.Context) {
+		botRouter.PUT("/user", func(c *gin.Context) {
 			bot := c.MustGet("Bot").(*types.Bot)
 
 			type UserRequest struct {
@@ -95,7 +95,7 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": resultingUser})
 		})
 
-		botApi.GET("/user/:TelegramID", func(c *gin.Context) {
+		botRouter.GET("/user/:TelegramID", func(c *gin.Context) {
 			bot := c.MustGet("Bot").(*types.Bot)
 
 			params := &struct {
@@ -120,71 +120,85 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": user})
 		})
 
+		botRouter.POST("/campaign", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+
+			campaign := &types.Campaign{}
+
+			if err := c.ShouldBindJSON(campaign); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			campaign.BotID = bot.ID
+
+			resultingCampaign, err := campaignDao.Create(campaign)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
+		})
+
+		router.GET("/campaign/:id", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+
+			urlParams := &struct {
+				ID int64 `uri:"id" binding:"required"`
+			}{}
+			if err := c.ShouldBindUri(urlParams); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			resultingCampaign, err := campaignDao.Get(urlParams.ID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if nil == resultingCampaign {
+				c.JSON(http.StatusNotFound, nil)
+				return
+			}
+			if resultingCampaign.BotID != bot.ID {
+				c.JSON(http.StatusForbidden, nil)
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
+		})
+
+		botRouter.PUT("/campaign/:id", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+
+			urlParams := &struct {
+				ID int64 `uri:"id" binding:"required"`
+			}{}
+			if err := c.ShouldBindUri(urlParams); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			campaignUpdate := &types.Campaign{}
+			if err := c.ShouldBindJSON(campaignUpdate); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			campaignUpdate.ID = urlParams.ID
+			campaignUpdate.BotID = bot.ID
+
+			resultingCampaign, err := campaignDao.Update(campaignUpdate)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
+		})
+
 	}
-
-	router.POST("/campaign", func(c *gin.Context) {
-		campaign := &types.Campaign{}
-
-		if err := c.ShouldBindJSON(campaign); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		resultingCampaign, err := campaignDao.Create(campaign)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
-	})
-
-	router.PUT("/campaign/:id", func(c *gin.Context) {
-		urlParams := &struct {
-			ID int64 `uri:"id" binding:"required"`
-		}{}
-		if err := c.ShouldBindUri(urlParams); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		campaign := &types.Campaign{}
-		if err := c.ShouldBindJSON(campaign); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		campaign.ID = urlParams.ID
-
-		resultingCampaign, err := campaignDao.Update(campaign)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
-	})
-
-	router.GET("/campaign/:id", func(c *gin.Context) {
-		urlParams := &struct {
-			ID int64 `uri:"id" binding:"required"`
-		}{}
-		if err := c.ShouldBindUri(urlParams); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		resultingCampaign, err := campaignDao.Get(urlParams.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		if nil == resultingCampaign {
-			c.JSON(http.StatusNotFound, nil)
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
-	})
 
 	router.POST("/campaign/:id/delivery", func(c *gin.Context) {
 		urlParams := &struct {

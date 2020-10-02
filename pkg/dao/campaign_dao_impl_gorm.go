@@ -3,9 +3,9 @@ package dao
 import (
 	"errors"
 
-	"github.com/jinzhu/copier"
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -29,7 +29,6 @@ func (dao *CampaignDaoImplGorm) Create(campaign *types.Campaign) (*types.Campaig
 	copier.Copy(resultingCampaign, campaignModel.Model)
 	copier.Copy(resultingCampaign, campaignModel)
 	return resultingCampaign, nil
-
 }
 
 func (dao *CampaignDaoImplGorm) Update(campaign *types.Campaign) (*types.Campaign, error) {
@@ -37,9 +36,10 @@ func (dao *CampaignDaoImplGorm) Update(campaign *types.Campaign) (*types.Campaig
 		return nil, errors.New("ID missing")
 	}
 	campaignModel := &database.Campaign{}
-	campaignModel.Campaign.ID = campaign.ID
 
-	if err := dao.db.First(campaignModel).Error; err != nil {
+	if err := dao.db.
+		Where("id = ? AND bot_id = ?", campaign.ID, campaign.BotID).
+		First(campaignModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -55,9 +55,9 @@ func (dao *CampaignDaoImplGorm) Update(campaign *types.Campaign) (*types.Campaig
 }
 
 func (dao *CampaignDaoImplGorm) Get(ID int64) (*types.Campaign, error) {
-	campaignModel := &database.Campaign{Campaign: types.Campaign{ID: ID}}
+	campaignModel := &database.Campaign{}
 
-	if err := dao.db.First(campaignModel).Error; err != nil {
+	if err := dao.db.Where("id = ?", ID).First(campaignModel).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
