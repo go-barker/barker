@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "database": "/home/mk/CODE/my1562/api/dev-db.sqlite3",
+            "driver": "SQLite",
+            "name": "asd",
+            "previewLimit": 50
+        }
+    ]
+}

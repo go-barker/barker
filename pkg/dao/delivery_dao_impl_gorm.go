@@ -45,6 +45,9 @@ func (dao *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*types.Deli
 					"AND deliveries.campaign_id = ?",
 				campaignID,
 			).
+			Joins("inner join campaigns on "+
+				"campaigns.bot_id = users.bot_id "+
+				"AND campaigns.id = ?", campaignID).
 			Where("deliveries.telegram_id IS NULL").
 			Where("users.deleted_at IS NULL").
 			Where("users.bot_id = ?", botID).

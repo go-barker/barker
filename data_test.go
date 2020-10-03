@@ -371,6 +371,13 @@ func TestData(t *testing.T) {
 					assert.NilError(t, err)
 					assert.Assert(t, deliveryB3 == nil)
 					assert.Assert(t, dUserB3 == nil)
+
+					t.Run("campaign does not belong to a bot", func(t *testing.T) {
+						wrongDelivery, wrongUser, err := deliveryDao.Take(botA.ID, campaignB.ID)
+						assert.NilError(t, err)
+						assert.Assert(t, wrongDelivery != nil)
+						assert.Assert(t, wrongUser == nil)
+					})
 				})
 
 			},

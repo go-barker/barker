@@ -7,4 +7,5 @@ import (
 
 func NewDialectorSQLiteMemory() gorm.Dialector {
 	return sqlite.Open("file::memory:")
+	// return sqlite.Open("file:test_data.sqlite3")
 }
