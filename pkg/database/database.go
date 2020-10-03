@@ -26,8 +26,9 @@ type Campaign struct {
 type Delivery struct {
 	gorm.Model
 	types.Delivery
-	CampaignID int64               `gorm:"uniqueIndex:idx_campaign_user"`
-	UserID     int64               `gorm:"uniqueIndex:idx_campaign_user"`
+	CampaignID int64               `gorm:"uniqueIndex:idx_campaign_bot_tg"`
+	BotID      int64               `gorm:"uniqueIndex:idx_campaign_bot_tg"`
+	TelegramID int64               `gorm:"uniqueIndex:idx_campaign_bot_tg"`
 	State      types.DeliveryState `gorm:"index"`
 }
 

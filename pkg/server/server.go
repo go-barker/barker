@@ -198,29 +198,28 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
 		})
 
+		//--------
+
+		campaignRouter := botRouter.Group("/campaign/:CampaignID")
+		campaignRouter.Use(middleware.NewMiddlewareLoadCampaign(campaignDao))
+		{
+			campaignRouter.POST("/delivery", func(c *gin.Context) {
+				campaign := c.MustGet("Campaign").(*types.Campaign)
+				bot := c.MustGet("Bot").(*types.Bot)
+
+				delivery, user, err := deliveryDao.Take(bot.ID, campaign.ID)
+				if err != nil {
+					c.JSON(http.StatusNotFound, nil)
+					return
+				}
+				c.JSON(http.StatusOK, gin.H{
+					"data":     delivery,
+					"campaign": campaign,
+					"user":     user,
+				})
+			})
+		}
 	}
-
-	router.POST("/campaign/:id/delivery", func(c *gin.Context) {
-		urlParams := &struct {
-			ID int64 `uri:"id" binding:"required"`
-		}{}
-		if err := c.ShouldBindUri(urlParams); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		delivery, campaign, user, err := deliveryDao.Take(urlParams.ID)
-		if err != nil {
-			c.JSON(http.StatusNotFound, nil)
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"data":     delivery,
-			"campaign": campaign,
-			"user":     user,
-		})
-
-	})
 
 	return router
 }

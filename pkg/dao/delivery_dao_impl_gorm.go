@@ -1,7 +1,11 @@
 package dao
 
 import (
+	"errors"
+
+	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -23,70 +27,61 @@ func NewDeliveryDaoImplGorm(
 	}
 }
 
-func (dao *DeliveryDaoImplGorm) Take(campaignID int64) (*types.Delivery, *types.Campaign, *types.User, error) {
-	panic("not implemented")
-	// errNoRecepients := errors.New("no recepients")
+func (dao *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*types.Delivery, *types.User, error) {
+	errNoRecepients := errors.New("no recepients")
 
-	// resultingDelivery := &types.Delivery{}
-	// var resultingUser *types.User
+	resultingDelivery := &types.Delivery{}
+	resultingUser := &types.User{}
 
-	// resultingCampaign, err := dao.campaignDao.Get(campaignID)
-	// if err != nil {
-	// 	return nil, nil, nil, err
-	// }
-	// if !resultingCampaign.Active {
-	// 	return nil, nil, nil, errors.New("campaign not found or not active")
-	// }
+	err := dao.db.Transaction(func(tx *gorm.DB) error {
+		recepientUser := &database.User{}
+		query := tx.
+			Table("users").
+			Select("users.*").
+			Joins(
+				"left outer join deliveries on "+
+					"deliveries.telegram_id = users.telegram_id "+
+					"AND deliveries.bot_id = users.bot_id "+
+					"AND deliveries.campaign_id = ?",
+				campaignID,
+			).
+			Where("deliveries.telegram_id IS NULL").
+			Where("users.deleted_at IS NULL").
+			Where("users.bot_id = ?", botID).
+			Limit(1).
+			Scan(recepientUser)
 
-	// err = dao.db.Transaction(func(tx *gorm.DB) error {
-	// 	userIDWrapper := &struct{ ID int64 }{}
-	// 	query := tx.
-	// 		Table("users").
-	// 		Select("users.id").
-	// 		Joins(
-	// 			"left outer join deliveries on deliveries.user_id = users.id and deliveries.campaign_id = ?",
-	// 			campaignID,
-	// 		).
-	// 		Where("deliveries.user_id IS NULL").
-	// 		Where("users.deleted_at IS NULL").
-	// 		Limit(1).
-	// 		Scan(userIDWrapper)
+		if err := query.Error; err != nil {
+			return err
+		}
+		if recepientUser.ID == 0 {
+			return errNoRecepients
+		}
 
-	// 	if err := query.Error; err != nil {
-	// 		return err
-	// 	}
-	// 	if userIDWrapper.ID == 0 {
-	// 		return errNoRecepients
-	// 	}
+		deliveryModel := &database.Delivery{
+			CampaignID: campaignID,
+			BotID:      botID,
+			TelegramID: recepientUser.TelegramID,
+			State:      types.DeliveryStateProgress,
+		}
+		if err := tx.Create(deliveryModel).Error; err != nil {
+			return err
+		}
 
-	// 	deliveryModel := &database.Delivery{
-	// 		CampaignID: campaignID,
-	// 		State:      types.DeliveryStateProgress,
-	// 		UserID:     userIDWrapper.ID,
-	// 	}
-	// 	if err := tx.Create(deliveryModel).Error; err != nil {
-	// 		return err
-	// 	}
+		copier.Copy(resultingDelivery, deliveryModel)
+		copier.Copy(resultingUser, recepientUser)
 
-	// 	copier.Copy(resultingDelivery, deliveryModel)
+		return nil
+	})
 
-	// 	resultingUser, err = dao.userDao.Get(resultingDelivery.UserID)
-	// 	if err != nil {
-	// 		tx.Rollback()
-	// 		return err
-	// 	}
+	if err != nil {
+		if errors.Is(err, errNoRecepients) {
+			return nil, nil, nil
+		}
+		return nil, nil, err
+	}
 
-	// 	return nil
-	// })
-
-	// if err != nil {
-	// 	if errors.Is(err, errNoRecepients) {
-	// 		return nil, nil, nil, nil
-	// 	}
-	// 	return nil, nil, nil, err
-	// }
-
-	// return resultingDelivery, resultingCampaign, resultingUser, nil
+	return resultingDelivery, resultingUser, nil
 }
 
 func (dao *DeliveryDaoImplGorm) Success(campaignID int64, userID int64) error {

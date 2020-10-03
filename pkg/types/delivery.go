@@ -10,6 +10,7 @@ const (
 
 type Delivery struct {
 	CampaignID int64
-	UserID     int64
+	BotID      int64
+	TelegramID int64
 	State      DeliveryState
 }
