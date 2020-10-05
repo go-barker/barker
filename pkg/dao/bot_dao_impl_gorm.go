@@ -5,7 +5,6 @@ import (
 
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -21,13 +20,13 @@ func NewBotDaoImplGorm(db *gorm.DB) BotDao {
 
 func (dao *BotDaoImplGorm) Create(bot *types.Bot) (*types.Bot, error) {
 	botModel := &database.Bot{}
-	copier.Copy(botModel, bot)
+	botModel.FromEntity(bot)
+
 	if err := dao.db.Create(botModel).Error; err != nil {
 		return nil, err
 	}
 	resultingBot := &types.Bot{}
-	copier.Copy(resultingBot, botModel.Model)
-	copier.Copy(resultingBot, botModel)
+	botModel.ToEntity(resultingBot)
 	return resultingBot, nil
 
 }
@@ -43,14 +42,13 @@ func (dao *BotDaoImplGorm) Update(bot *types.Bot) (*types.Bot, error) {
 		return nil, err
 	}
 
-	copier.Copy(botModel, bot)
+	botModel.FromEntity(bot)
 
 	if err := dao.db.Save(botModel).Error; err != nil {
 		return nil, err
 	}
 	resultingBot := &types.Bot{}
-	copier.Copy(resultingBot, botModel.Model)
-	copier.Copy(resultingBot, botModel)
+	botModel.ToEntity(resultingBot)
 	return resultingBot, nil
 }
 
@@ -65,9 +63,8 @@ func (dao *BotDaoImplGorm) Get(ID int64) (*types.Bot, error) {
 	}
 
 	resultingBot := &types.Bot{ID: ID}
-	copier.Copy(resultingBot, botModel)
+	botModel.ToEntity(resultingBot)
 	return resultingBot, nil
-
 }
 
 func (dao *BotDaoImplGorm) List() ([]types.Bot, error) {

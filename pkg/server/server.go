@@ -8,7 +8,6 @@ import (
 	"github.com/corporateanon/barker/pkg/server/middleware"
 	"github.com/corporateanon/barker/pkg/types"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 )
 
 func NewHandler(
@@ -81,12 +80,14 @@ func NewHandler(
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			userRequest.BotID = bot.ID
 
-			user := &types.User{}
-			copier.Copy(user, userRequest)
-
-			resultingUser, err := userDao.Put(user)
+			resultingUser, err := userDao.Put(&types.User{
+				BotID:       bot.ID,
+				DisplayName: userRequest.DisplayName,
+				FirstName:   userRequest.FirstName,
+				LastName:    userRequest.LastName,
+				UserName:    userRequest.UserName,
+			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return

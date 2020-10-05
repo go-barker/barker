@@ -5,7 +5,6 @@ import (
 
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -21,13 +20,12 @@ func NewCampaignDaoImplGorm(db *gorm.DB) CampaignDao {
 
 func (dao *CampaignDaoImplGorm) Create(campaign *types.Campaign) (*types.Campaign, error) {
 	campaignModel := &database.Campaign{}
-	copier.Copy(campaignModel, campaign)
+	campaignModel.FromEntity(campaign)
 	if err := dao.db.Create(campaignModel).Error; err != nil {
 		return nil, err
 	}
 	resultingCampaign := &types.Campaign{}
-	copier.Copy(resultingCampaign, campaignModel.Model)
-	copier.Copy(resultingCampaign, campaignModel)
+	campaignModel.ToEntity(resultingCampaign)
 	return resultingCampaign, nil
 }
 
@@ -43,14 +41,13 @@ func (dao *CampaignDaoImplGorm) Update(campaign *types.Campaign) (*types.Campaig
 		return nil, err
 	}
 
-	copier.Copy(campaignModel, campaign)
+	campaignModel.FromEntity(campaign)
 
 	if err := dao.db.Save(campaignModel).Error; err != nil {
 		return nil, err
 	}
 	resultingCampaign := &types.Campaign{}
-	copier.Copy(resultingCampaign, campaignModel.Model)
-	copier.Copy(resultingCampaign, campaignModel)
+	campaignModel.ToEntity(resultingCampaign)
 	return resultingCampaign, nil
 }
 
@@ -65,7 +62,7 @@ func (dao *CampaignDaoImplGorm) Get(ID int64) (*types.Campaign, error) {
 	}
 
 	resultingCampaign := &types.Campaign{ID: ID}
-	copier.Copy(resultingCampaign, campaignModel)
+	campaignModel.ToEntity(resultingCampaign)
 	return resultingCampaign, nil
 }
 

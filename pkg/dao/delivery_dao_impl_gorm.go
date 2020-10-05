@@ -5,7 +5,6 @@ import (
 
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -34,7 +33,7 @@ func (dao *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*types.Deli
 	resultingUser := &types.User{}
 
 	err := dao.db.Transaction(func(tx *gorm.DB) error {
-		recepientUser := &database.User{}
+		recepientUserModel := &database.User{}
 		query := tx.
 			Table("users").
 			Select("users.*").
@@ -52,27 +51,27 @@ func (dao *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*types.Deli
 			Where("users.deleted_at IS NULL").
 			Where("users.bot_id = ?", botID).
 			Limit(1).
-			Scan(recepientUser)
+			Scan(recepientUserModel)
 
 		if err := query.Error; err != nil {
 			return err
 		}
-		if recepientUser.ID == 0 {
+		if recepientUserModel.ID == 0 {
 			return errNoRecepients
 		}
 
 		deliveryModel := &database.Delivery{
 			CampaignID: campaignID,
 			BotID:      botID,
-			TelegramID: recepientUser.TelegramID,
+			TelegramID: recepientUserModel.TelegramID,
 			State:      types.DeliveryStateProgress,
 		}
 		if err := tx.Create(deliveryModel).Error; err != nil {
 			return err
 		}
 
-		copier.Copy(resultingDelivery, deliveryModel)
-		copier.Copy(resultingUser, recepientUser)
+		deliveryModel.ToEntity(resultingDelivery)
+		recepientUserModel.ToEntity(resultingUser)
 
 		return nil
 	})

@@ -5,7 +5,6 @@ import (
 
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -23,7 +22,7 @@ func (dao *UserDaoImplGorm) Put(user *types.User) (*types.User, error) {
 
 	resultingUser := &types.User{}
 	userModel := &database.User{}
-	copier.Copy(userModel, user)
+	userModel.FromEntity(user)
 
 	err := dao.db.Transaction(func(tx *gorm.DB) error {
 		existingUser := &database.User{}
@@ -41,14 +40,14 @@ func (dao *UserDaoImplGorm) Put(user *types.User) (*types.User, error) {
 			if err := tx.Create(userModel).Error; err != nil {
 				return err
 			}
-			copier.Copy(resultingUser, userModel)
+			userModel.ToEntity(resultingUser)
 			return nil
 		}
 		//A user is found
 		if err := tx.Model(existingUser).Updates(userModel).Error; err != nil {
 			return err
 		}
-		copier.Copy(resultingUser, existingUser)
+		existingUser.ToEntity(resultingUser)
 		return nil
 	})
 
@@ -70,7 +69,6 @@ func (dao *UserDaoImplGorm) Get(botID int64, telegramID int64) (*types.User, err
 		return nil, err
 	}
 	user := &types.User{}
-	copier.Copy(user, userModel)
+	userModel.ToEntity(user)
 	return user, nil
-
 }
