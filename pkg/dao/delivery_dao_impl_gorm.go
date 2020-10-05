@@ -86,10 +86,31 @@ func (dao *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*types.Deli
 	return resultingDelivery, resultingUser, nil
 }
 
-func (dao *DeliveryDaoImplGorm) Success(campaignID int64, userID int64) error {
-	panic("not implemented")
+func (dao *DeliveryDaoImplGorm) SetState(delivery *types.Delivery, state types.DeliveryState) error {
+	if state != types.DeliveryStateProgress &&
+		state != types.DeliveryStateSuccess &&
+		state != types.DeliveryStateFail {
+		return errors.New("Wrong delivery state")
+	}
+
+	return dao.db.Model(&database.Delivery{}).
+		Where("bot_id = ? AND campaign_id = ? AND telegram_id = ?",
+			delivery.BotID,
+			delivery.CampaignID,
+			delivery.TelegramID).
+		Update("state", state).Error
 }
 
-func (dao *DeliveryDaoImplGorm) Fail(campaignID int64, userID int64) error {
-	panic("not implemented")
+func (dao *DeliveryDaoImplGorm) GetState(delivery *types.Delivery) (types.DeliveryState, error) {
+	result := &struct{ State types.DeliveryState }{}
+	query := dao.db.Model(&database.Delivery{}).
+		Where("bot_id = ? AND campaign_id = ? AND telegram_id = ?",
+			delivery.BotID,
+			delivery.CampaignID,
+			delivery.TelegramID).
+		Select("state").Scan(result)
+	if query.Error != nil {
+		return 0, query.Error
+	}
+	return result.State, nil
 }

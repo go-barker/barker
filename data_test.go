@@ -378,8 +378,24 @@ func TestData(t *testing.T) {
 						assert.Assert(t, wrongDelivery == nil)
 						assert.Assert(t, wrongUser == nil)
 					})
-				})
 
+					t.Run("update deliveries", func(t *testing.T) {
+						err := deliveryDao.SetState(deliveryA1, types.DeliveryStateSuccess)
+						assert.NilError(t, err)
+
+						deliveryA1UpdatedState, err := deliveryDao.GetState(deliveryA1)
+						assert.Assert(t, deliveryA1UpdatedState == types.DeliveryStateSuccess)
+
+						deliveryA2UnchangedState, err := deliveryDao.GetState(deliveryA2)
+						assert.Assert(t, deliveryA2UnchangedState == types.DeliveryStateProgress)
+
+						err = deliveryDao.SetState(deliveryA2, types.DeliveryStateFail)
+						assert.NilError(t, err)
+
+						deliveryA2UpdatedState, err := deliveryDao.GetState(deliveryA2)
+						assert.Assert(t, deliveryA2UpdatedState == types.DeliveryStateFail)
+					})
+				})
 			},
 		),
 	)
