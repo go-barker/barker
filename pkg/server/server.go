@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/corporateanon/barker/pkg/config"
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/server/middleware"
 	"github.com/corporateanon/barker/pkg/types"
@@ -11,7 +10,6 @@ import (
 )
 
 func NewHandler(
-	config *config.Config,
 	userDao dao.UserDao,
 	campaignDao dao.CampaignDao,
 	deliveryDao dao.DeliveryDao,
@@ -87,6 +85,7 @@ func NewHandler(
 				FirstName:   userRequest.FirstName,
 				LastName:    userRequest.LastName,
 				UserName:    userRequest.UserName,
+				TelegramID:  userRequest.TelegramID,
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -142,39 +141,39 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
 		})
 
-		router.GET("/campaign/:id", func(c *gin.Context) {
+		// router.GET("/campaign/:id", func(c *gin.Context) {
+		// 	bot := c.MustGet("Bot").(*types.Bot)
+
+		// 	urlParams := &struct {
+		// 		ID int64 `uri:"id" binding:"required"`
+		// 	}{}
+		// 	if err := c.ShouldBindUri(urlParams); err != nil {
+		// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// 		return
+		// 	}
+
+		// 	resultingCampaign, err := campaignDao.Get(urlParams.ID)
+		// 	if err != nil {
+		// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// 		return
+		// 	}
+		// 	if nil == resultingCampaign {
+		// 		c.JSON(http.StatusNotFound, nil)
+		// 		return
+		// 	}
+		// 	if resultingCampaign.BotID != bot.ID {
+		// 		c.JSON(http.StatusForbidden, nil)
+		// 		return
+		// 	}
+
+		// 	c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
+		// })
+
+		botRouter.PUT("/campaign/:CampaignID", func(c *gin.Context) {
 			bot := c.MustGet("Bot").(*types.Bot)
 
 			urlParams := &struct {
-				ID int64 `uri:"id" binding:"required"`
-			}{}
-			if err := c.ShouldBindUri(urlParams); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-
-			resultingCampaign, err := campaignDao.Get(urlParams.ID)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			if nil == resultingCampaign {
-				c.JSON(http.StatusNotFound, nil)
-				return
-			}
-			if resultingCampaign.BotID != bot.ID {
-				c.JSON(http.StatusForbidden, nil)
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
-		})
-
-		botRouter.PUT("/campaign/:id", func(c *gin.Context) {
-			bot := c.MustGet("Bot").(*types.Bot)
-
-			urlParams := &struct {
-				ID int64 `uri:"id" binding:"required"`
+				CampaignID int64 `uri:"CampaignID" binding:"required"`
 			}{}
 			if err := c.ShouldBindUri(urlParams); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -187,7 +186,7 @@ func NewHandler(
 				return
 			}
 
-			campaignUpdate.ID = urlParams.ID
+			campaignUpdate.ID = urlParams.CampaignID
 			campaignUpdate.BotID = bot.ID
 
 			resultingCampaign, err := campaignDao.Update(campaignUpdate)
@@ -204,10 +203,14 @@ func NewHandler(
 		campaignRouter := botRouter.Group("/campaign/:CampaignID")
 		campaignRouter.Use(middleware.NewMiddlewareLoadCampaign(campaignDao))
 		{
+			campaignRouter.GET("", func(c *gin.Context) {
+				campaign := c.MustGet("campaign").(*types.Campaign)
+				c.JSON(http.StatusOK, gin.H{"data": campaign})
+			})
+
 			campaignRouter.POST("/delivery", func(c *gin.Context) {
 				campaign := c.MustGet("Campaign").(*types.Campaign)
 				bot := c.MustGet("Bot").(*types.Bot)
-
 				delivery, user, err := deliveryDao.Take(bot.ID, campaign.ID)
 				if err != nil {
 					c.JSON(http.StatusNotFound, nil)
@@ -217,6 +220,57 @@ func NewHandler(
 					"data":     delivery,
 					"campaign": campaign,
 					"user":     user,
+				})
+			})
+
+			campaignRouter.PUT("/delivery/:TelegramID/state/:State", func(c *gin.Context) {
+				campaign := c.MustGet("Campaign").(*types.Campaign)
+				bot := c.MustGet("Bot").(*types.Bot)
+				urlParams := &struct {
+					TelegramID int64  `uri:"TelegramID" binding:"required"`
+					State      string `uri:"State" binding:"required"`
+				}{}
+				state, err := types.DeliveryStateFromString(urlParams.State)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, nil)
+					return
+				}
+				err = deliveryDao.SetState(&types.Delivery{
+					BotID:      bot.ID,
+					CampaignID: campaign.ID,
+					TelegramID: urlParams.TelegramID,
+				}, state)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(http.StatusOK, nil)
+			})
+
+			campaignRouter.GET("/delivery/:TelegramID/state", func(c *gin.Context) {
+				campaign := c.MustGet("Campaign").(*types.Campaign)
+				bot := c.MustGet("Bot").(*types.Bot)
+				urlParams := &struct {
+					TelegramID int64 `uri:"TelegramID" binding:"required"`
+				}{}
+
+				state, err := deliveryDao.GetState(&types.Delivery{
+					BotID:      bot.ID,
+					CampaignID: campaign.ID,
+					TelegramID: urlParams.TelegramID,
+				})
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				stateAsString, err := state.ToString()
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{
+					"data": stateAsString,
 				})
 			})
 		}
