@@ -35,16 +35,16 @@ func createIntegrationTestConfigurationServer() fx.Option {
 
 func createIntegrationTestConfigurationClient() fx.Option {
 	return fx.Provide(
-		NewMockClient,
-		dao.NewCampaignDaoImplGorm,
-		dao.NewDeliveryDaoImplGorm,
+		newLocalClient,
 		client.NewBotDaoImplResty,
 		client.NewUserDaoImplResty,
+		client.NewCampaignDaoImplResty,
+		client.NewDeliveryDaoImplResty,
 		database.NewDatabase,
 		database.NewDialectorSQLiteMemory,
 	)
 }
 
-func NewMockClient() *resty.Client {
+func newLocalClient() *resty.Client {
 	return resty.New().SetHostURL("http://127.0.0.1:3000")
 }

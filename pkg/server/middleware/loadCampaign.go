@@ -22,7 +22,7 @@ func NewMiddlewareLoadCampaign(campaignDao dao.CampaignDao) func(c *gin.Context)
 			)
 			return
 		}
-		campaign, err := campaignDao.Get(params.CampaignID)
+		campaign, err := campaignDao.Get(bot.ID, params.CampaignID)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,
@@ -34,20 +34,6 @@ func NewMiddlewareLoadCampaign(campaignDao dao.CampaignDao) func(c *gin.Context)
 			c.AbortWithStatusJSON(
 				http.StatusNotFound,
 				gin.H{"error": "Campaign not found"},
-			)
-			return
-		}
-		if campaign.ID != bot.ID {
-			c.AbortWithStatusJSON(
-				http.StatusNotFound,
-				gin.H{"error": "Campaign not found"},
-			)
-			return
-		}
-		if !campaign.Active {
-			c.AbortWithStatusJSON(
-				http.StatusNotFound,
-				gin.H{"error": "Campaign not active"},
 			)
 			return
 		}

@@ -9,7 +9,6 @@ import (
 	"github.com/corporateanon/barker/pkg/types"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
-	"gorm.io/gorm"
 	"gotest.tools/assert"
 )
 
@@ -167,7 +166,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					Title:   "hello world",
 					Message: "hello, user",
 				})
-				campaign1, err := campaignDao.Get(1)
+				campaign1, err := campaignDao.Get(1, 1)
 				assert.DeepEqual(t, campaign1, &types.Campaign{
 					ID:      1,
 					BotID:   1,
@@ -190,7 +189,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					Title:   "foo",
 					Message: "bar",
 				})
-				campaign2, err := campaignDao.Get(2)
+				campaign2, err := campaignDao.Get(1, 2)
 				assert.DeepEqual(t, campaign2, &types.Campaign{
 					ID:      2,
 					BotID:   1,
@@ -243,11 +242,11 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					Message: "hello",
 					Title:   "world",
 				})
-				assert.Error(t, gorm.ErrRecordNotFound, "record not found")
+				assert.Error(t, errorWrongBotID, "record not found")
 
-				campaign1, err := campaignDao.Get(1)
+				campaign1, err := campaignDao.Get(1, 1)
 				assert.NilError(t, err)
-				campaign2, err := campaignDao.Get(2)
+				campaign2, err := campaignDao.Get(1, 2)
 				assert.NilError(t, err)
 
 				assert.DeepEqual(t, campaign1, &types.Campaign{
@@ -378,8 +377,10 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				assert.Assert(t, dUserB3 == nil)
 
 				t.Run("campaign does not belong to a bot", func(t *testing.T) {
-					wrongDelivery, wrongUser, err := deliveryDao.Take(botA.ID, campaignB.ID)
-					assert.NilError(t, err)
+					wrongDelivery, wrongUser, _ := deliveryDao.Take(botA.ID, campaignB.ID)
+					//Error depends on an implementation.
+					//Gorm implementation does not return error.
+					//Resty implementation returns it, because campaign is checked against bot in HTTP request middleware.
 					assert.Assert(t, wrongDelivery == nil)
 					assert.Assert(t, wrongUser == nil)
 				})

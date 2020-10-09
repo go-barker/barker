@@ -8,14 +8,6 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type ErrorResponse struct {
-	Message string `json:"error,omitempty"`
-}
-
-func (e *ErrorResponse) Error() string {
-	return e.Message
-}
-
 type BotDaoImplResty struct {
 	resty *resty.Client
 }
@@ -29,6 +21,7 @@ func NewBotDaoImplResty(resty *resty.Client) dao.BotDao {
 func (dao *BotDaoImplResty) Create(bot *types.Bot) (*types.Bot, error) {
 	resultWrapper := &struct{ Data *types.Bot }{Data: &types.Bot{}}
 	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
 		SetBody(bot).
 		SetResult(resultWrapper).
 		Post("/bot")
@@ -44,6 +37,7 @@ func (dao *BotDaoImplResty) Create(bot *types.Bot) (*types.Bot, error) {
 func (dao *BotDaoImplResty) Update(bot *types.Bot) (*types.Bot, error) {
 	resultWrapper := &struct{ Data *types.Bot }{Data: &types.Bot{}}
 	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
 		SetBody(bot).
 		SetResult(resultWrapper).
 		SetPathParams(map[string]string{
@@ -62,6 +56,7 @@ func (dao *BotDaoImplResty) Update(bot *types.Bot) (*types.Bot, error) {
 func (dao *BotDaoImplResty) Get(ID int64) (*types.Bot, error) {
 	resultWrapper := &struct{ Data *types.Bot }{Data: &types.Bot{}}
 	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
 		SetResult(resultWrapper).
 		SetPathParams(map[string]string{
 			"id": strconv.FormatInt(ID, 10),

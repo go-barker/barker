@@ -9,18 +9,18 @@ import (
 	"go.uber.org/fx"
 )
 
-// func TestLocalGorm(t *testing.T) {
-// 	app := fx.New(
-// 		createIntegrationTestConfigurationGorm(),
-// 		createIntegrationTestInvocation(t),
-// 	)
+func TestLocalGorm(t *testing.T) {
+	app := fx.New(
+		createIntegrationTestConfigurationGorm(),
+		createIntegrationTestInvocation(t),
+	)
 
-// 	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-// 	defer cancel()
-// 	if err := app.Start(startCtx); err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
+	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := app.Start(startCtx); err != nil {
+		log.Fatal(err)
+	}
+}
 
 func TestClientServer(t *testing.T) {
 	//FIXME: this is wrong! Use lifecycle methods!!!
@@ -47,10 +47,4 @@ func TestClientServer(t *testing.T) {
 		createIntegrationTestConfigurationClient(),
 		createIntegrationTestInvocation(t),
 	)
-
-	// startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	// defer cancel()
-	// if err := clientApp.Start(startCtx); err != nil {
-	// 	log.Fatal(err)
-	// }
 }

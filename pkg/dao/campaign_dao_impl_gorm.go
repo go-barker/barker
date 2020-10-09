@@ -51,10 +51,13 @@ func (dao *CampaignDaoImplGorm) Update(campaign *types.Campaign) (*types.Campaig
 	return resultingCampaign, nil
 }
 
-func (dao *CampaignDaoImplGorm) Get(ID int64) (*types.Campaign, error) {
+func (dao *CampaignDaoImplGorm) Get(botID int64, ID int64) (*types.Campaign, error) {
 	campaignModel := &database.Campaign{}
 
-	if err := dao.db.Where("id = ?", ID).First(campaignModel).Error; err != nil {
+	if err := dao.db.
+		Where("id = ?", ID).
+		Where("bot_id = ?", botID).
+		First(campaignModel).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}

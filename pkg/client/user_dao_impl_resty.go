@@ -21,6 +21,7 @@ func NewUserDaoImplResty(resty *resty.Client) dao.UserDao {
 func (dao *UserDaoImplResty) Put(user *types.User) (*types.User, error) {
 	resultWrapper := &struct{ Data *types.User }{Data: &types.User{}}
 	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
 		SetBody(user).
 		SetResult(resultWrapper).
 		SetPathParams(map[string]string{
@@ -39,6 +40,7 @@ func (dao *UserDaoImplResty) Put(user *types.User) (*types.User, error) {
 func (dao *UserDaoImplResty) Get(botID int64, telegramID int64) (*types.User, error) {
 	resultWrapper := &struct{ Data *types.User }{Data: &types.User{}}
 	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
 		SetResult(resultWrapper).
 		SetPathParams(map[string]string{
 			"BotID":      strconv.FormatInt(botID, 10),

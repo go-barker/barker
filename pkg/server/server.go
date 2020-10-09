@@ -204,7 +204,7 @@ func NewHandler(
 		campaignRouter.Use(middleware.NewMiddlewareLoadCampaign(campaignDao))
 		{
 			campaignRouter.GET("", func(c *gin.Context) {
-				campaign := c.MustGet("campaign").(*types.Campaign)
+				campaign := c.MustGet("Campaign").(*types.Campaign)
 				c.JSON(http.StatusOK, gin.H{"data": campaign})
 			})
 
@@ -230,6 +230,10 @@ func NewHandler(
 					TelegramID int64  `uri:"TelegramID" binding:"required"`
 					State      string `uri:"State" binding:"required"`
 				}{}
+				if err := c.ShouldBindUri(urlParams); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
 				state, err := types.DeliveryStateFromString(urlParams.State)
 				if err != nil {
 					c.JSON(http.StatusBadRequest, nil)
@@ -253,7 +257,10 @@ func NewHandler(
 				urlParams := &struct {
 					TelegramID int64 `uri:"TelegramID" binding:"required"`
 				}{}
-
+				if err := c.ShouldBindUri(urlParams); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
 				state, err := deliveryDao.GetState(&types.Delivery{
 					BotID:      bot.ID,
 					CampaignID: campaign.ID,
