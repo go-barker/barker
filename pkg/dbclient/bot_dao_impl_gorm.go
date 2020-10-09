@@ -1,8 +1,9 @@
-package dao
+package dbclient
 
 import (
 	"errors"
 
+	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ type BotDaoImplGorm struct {
 	db *gorm.DB
 }
 
-func NewBotDaoImplGorm(db *gorm.DB) BotDao {
+func NewBotDaoImplGorm(db *gorm.DB) dao.BotDao {
 	return &BotDaoImplGorm{
 		db: db,
 	}

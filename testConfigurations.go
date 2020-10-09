@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/corporateanon/barker/pkg/client"
-	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/dbclient"
 	"github.com/corporateanon/barker/pkg/server"
 	"github.com/go-resty/resty/v2"
 
@@ -12,10 +12,10 @@ import (
 
 func createIntegrationTestConfigurationGorm() fx.Option {
 	return fx.Provide(
-		dao.NewUserDaoImplGorm,
-		dao.NewCampaignDaoImplGorm,
-		dao.NewDeliveryDaoImplGorm,
-		dao.NewBotDaoImplGorm,
+		dbclient.NewUserDaoImplGorm,
+		dbclient.NewCampaignDaoImplGorm,
+		dbclient.NewDeliveryDaoImplGorm,
+		dbclient.NewBotDaoImplGorm,
 		database.NewDatabase,
 		database.NewDialectorSQLiteMemory,
 	)
@@ -24,10 +24,10 @@ func createIntegrationTestConfigurationGorm() fx.Option {
 func createIntegrationTestConfigurationServer() fx.Option {
 	return fx.Provide(
 		server.NewHandler,
-		dao.NewUserDaoImplGorm,
-		dao.NewCampaignDaoImplGorm,
-		dao.NewDeliveryDaoImplGorm,
-		dao.NewBotDaoImplGorm,
+		dbclient.NewUserDaoImplGorm,
+		dbclient.NewCampaignDaoImplGorm,
+		dbclient.NewDeliveryDaoImplGorm,
+		dbclient.NewBotDaoImplGorm,
 		database.NewDatabase,
 		database.NewDialectorSQLiteMemory,
 	)

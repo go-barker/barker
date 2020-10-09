@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/corporateanon/barker/pkg/config"
-	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/dbclient"
 	"github.com/corporateanon/barker/pkg/server"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -20,10 +20,10 @@ func main() {
 		fx.Provide(
 			server.NewHandler,
 			config.NewConfig,
-			dao.NewUserDaoImplGorm,
-			dao.NewCampaignDaoImplGorm,
-			dao.NewDeliveryDaoImplGorm,
-			dao.NewBotDaoImplGorm,
+			dbclient.NewUserDaoImplGorm,
+			dbclient.NewCampaignDaoImplGorm,
+			dbclient.NewDeliveryDaoImplGorm,
+			dbclient.NewBotDaoImplGorm,
 			database.NewDatabase,
 			database.NewDialectorMySQL,
 		),

@@ -1,8 +1,9 @@
-package dao
+package dbclient
 
 import (
 	"errors"
 
+	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ type CampaignDaoImplGorm struct {
 	db *gorm.DB
 }
 
-func NewCampaignDaoImplGorm(db *gorm.DB) CampaignDao {
+func NewCampaignDaoImplGorm(db *gorm.DB) dao.CampaignDao {
 	return &CampaignDaoImplGorm{
 		db: db,
 	}

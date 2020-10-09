@@ -1,8 +1,9 @@
-package dao
+package dbclient
 
 import (
 	"errors"
 
+	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
 	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
@@ -10,15 +11,15 @@ import (
 
 type DeliveryDaoImplGorm struct {
 	db          *gorm.DB
-	campaignDao CampaignDao
-	userDao     UserDao
+	campaignDao dao.CampaignDao
+	userDao     dao.UserDao
 }
 
 func NewDeliveryDaoImplGorm(
 	db *gorm.DB,
-	campaignDao CampaignDao,
-	userDao UserDao,
-) DeliveryDao {
+	campaignDao dao.CampaignDao,
+	userDao dao.UserDao,
+) dao.DeliveryDao {
 	return &DeliveryDaoImplGorm{
 		db:          db,
 		campaignDao: campaignDao,
