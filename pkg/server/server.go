@@ -200,7 +200,15 @@ func NewHandler(
 
 		botRouter.POST("/delivery", func(c *gin.Context) {
 			bot := c.MustGet("Bot").(*types.Bot)
-			result, err := deliveryDao.Take(bot.ID, 0)
+			urlParams := &struct {
+				TelegramID int64 `form:"TelegramID"`
+			}{}
+			if err := c.ShouldBind(urlParams); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			result, err := deliveryDao.Take(bot.ID, 0, urlParams.TelegramID)
 			if err != nil {
 				c.JSON(http.StatusNotFound, nil)
 				return
@@ -223,7 +231,16 @@ func NewHandler(
 			campaignRouter.POST("/delivery", func(c *gin.Context) {
 				campaign := c.MustGet("Campaign").(*types.Campaign)
 				bot := c.MustGet("Bot").(*types.Bot)
-				result, err := deliveryDao.Take(bot.ID, campaign.ID)
+
+				urlParams := &struct {
+					TelegramID int64 `form:"TelegramID"`
+				}{}
+				if err := c.ShouldBind(urlParams); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
+
+				result, err := deliveryDao.Take(bot.ID, campaign.ID, urlParams.TelegramID)
 				if err != nil {
 					c.JSON(http.StatusNotFound, nil)
 					return

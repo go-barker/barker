@@ -327,7 +327,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 
 				//--------
 
-				resultA1, err := deliveryDao.Take(botA.ID, campaignA.ID)
+				resultA1, err := deliveryDao.Take(botA.ID, campaignA.ID, 0)
 				assert.NilError(t, err)
 				assert.DeepEqual(t, resultA1.Delivery, &types.Delivery{
 					BotID:      botA.ID,
@@ -337,7 +337,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				})
 				assert.DeepEqual(t, resultA1.User, userA1)
 
-				resultA2, err := deliveryDao.Take(botA.ID, campaignA.ID)
+				resultA2, err := deliveryDao.Take(botA.ID, campaignA.ID, 0)
 				assert.NilError(t, err)
 				assert.DeepEqual(t, resultA2.Delivery, &types.Delivery{
 					BotID:      botA.ID,
@@ -347,13 +347,13 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				})
 				assert.DeepEqual(t, resultA2.User, userA2)
 
-				resultA3, err := deliveryDao.Take(botA.ID, campaignA.ID)
+				resultA3, err := deliveryDao.Take(botA.ID, campaignA.ID, 0)
 				assert.NilError(t, err)
 				assert.Assert(t, resultA3 == nil)
 
 				//--------
 
-				resultB1, err := deliveryDao.Take(botB.ID, campaignB.ID)
+				resultB1, err := deliveryDao.Take(botB.ID, campaignB.ID, 0)
 				assert.NilError(t, err)
 				assert.DeepEqual(t, resultB1.Delivery, &types.Delivery{
 					BotID:      botB.ID,
@@ -363,7 +363,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				})
 				assert.DeepEqual(t, resultB1.User, userB1)
 
-				resultB2, err := deliveryDao.Take(botB.ID, campaignB.ID)
+				resultB2, err := deliveryDao.Take(botB.ID, campaignB.ID, 0)
 				assert.NilError(t, err)
 				assert.DeepEqual(t, resultB2.Delivery, &types.Delivery{
 					BotID:      botB.ID,
@@ -373,12 +373,12 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				})
 				assert.DeepEqual(t, resultB2.User, userB2)
 
-				resultB3, err := deliveryDao.Take(botB.ID, campaignB.ID)
+				resultB3, err := deliveryDao.Take(botB.ID, campaignB.ID, 0)
 				assert.NilError(t, err)
 				assert.Assert(t, resultB3 == nil)
 
 				t.Run("campaign does not belong to a bot", func(t *testing.T) {
-					wrongResult, _ := deliveryDao.Take(botA.ID, campaignB.ID)
+					wrongResult, _ := deliveryDao.Take(botA.ID, campaignB.ID, 0)
 					//Error depends on an implementation.
 					//Gorm implementation does not return error.
 					//Resty implementation returns it, because campaign is checked against bot in HTTP request middleware.
@@ -404,69 +404,80 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 			})
 			// #endregion
 
-			// #region(collapsed) [advanced take deliveries]
-			t.Run("advanced take deliveries", func(t *testing.T) {
-				botAlpha, err := botDao.Create(&types.Bot{
-					Title: "Bot Alpha",
-					Token: "bot:alpha",
-				})
-				assert.NilError(t, err)
-				botBeta, err := botDao.Create(&types.Bot{
-					Title: "Bot Beta",
-					Token: "bot:beta",
-				})
-				assert.NilError(t, err)
-
-				usersAlphaIDs := []int64{}
-				usersBetaIDs := []int64{}
-
-				for i := 0; i < 10; i++ {
-					userAlpha, err := userDao.Put(&types.User{
-						DisplayName: fmt.Sprintf("Mass user Alpha-%d", i),
-						BotID:       botAlpha.ID,
-						TelegramID:  int64(i + 1000),
+			// #region(collapsed) [take deliveries for any campaign]
+			t.Run("take deliveries for any campaign", func(t *testing.T) {
+				prepareData := func() (
+					usersAlphaIDs []int64,
+					usersBetaIDs []int64,
+					campaignsAlphaIDs []int64,
+					campaignsBetaIDs []int64,
+					botAlpha *types.Bot,
+					botBeta *types.Bot,
+				) {
+					var err error
+					botAlpha, err = botDao.Create(&types.Bot{
+						Title: "Bot Alpha",
+						Token: "bot:alpha",
 					})
 					assert.NilError(t, err)
-					usersAlphaIDs = append(usersAlphaIDs, userAlpha.TelegramID)
-					userBeta, err := userDao.Put(&types.User{
-						DisplayName: fmt.Sprintf("Mass user Beta-%d", i),
-						BotID:       botBeta.ID,
-						TelegramID:  int64(i + 1000),
+					botBeta, err = botDao.Create(&types.Bot{
+						Title: "Bot Beta",
+						Token: "bot:beta",
 					})
 					assert.NilError(t, err)
-					usersBetaIDs = append(usersBetaIDs, userBeta.TelegramID)
+
+					usersAlphaIDs = []int64{}
+					usersBetaIDs = []int64{}
+
+					for i := 0; i < 10; i++ {
+						userAlpha, err := userDao.Put(&types.User{
+							DisplayName: fmt.Sprintf("Mass user Alpha-%d", i),
+							BotID:       botAlpha.ID,
+							TelegramID:  int64(i + 1000),
+						})
+						assert.NilError(t, err)
+						usersAlphaIDs = append(usersAlphaIDs, userAlpha.TelegramID)
+						userBeta, err := userDao.Put(&types.User{
+							DisplayName: fmt.Sprintf("Mass user Beta-%d", i),
+							BotID:       botBeta.ID,
+							TelegramID:  int64(i + 1000),
+						})
+						assert.NilError(t, err)
+						usersBetaIDs = append(usersBetaIDs, userBeta.TelegramID)
+					}
+
+					campaignsAlphaIDs = []int64{}
+					campaignsBetaIDs = []int64{}
+
+					for i := 0; i < 3; i++ {
+						cmp, _ := campaignDao.Create(&types.Campaign{
+							BotID:   botAlpha.ID,
+							Active:  true,
+							Title:   fmt.Sprintf("Title Alpha-%d", i),
+							Message: fmt.Sprintf("Message Alpha-%d", i),
+						})
+						campaignsAlphaIDs = append(campaignsAlphaIDs, cmp.ID)
+					}
+
+					for i := 0; i < 4; i++ {
+						cmp, _ := campaignDao.Create(&types.Campaign{
+							BotID:   botBeta.ID,
+							Active:  true,
+							Title:   fmt.Sprintf("Title Beta-%d", i),
+							Message: fmt.Sprintf("Message Beta-%d", i),
+						})
+						campaignsBetaIDs = append(campaignsBetaIDs, cmp.ID)
+					}
+					return
 				}
 
-				campaignsAlphaIDs := []int64{}
-				campaignsBetaIDs := []int64{}
-
-				for i := 0; i < 3; i++ {
-					cmp, _ := campaignDao.Create(&types.Campaign{
-						BotID:   botAlpha.ID,
-						Active:  true,
-						Title:   fmt.Sprintf("Title Alpha-%d", i),
-						Message: fmt.Sprintf("Message Alpha-%d", i),
-					})
-					campaignsAlphaIDs = append(campaignsAlphaIDs, cmp.ID)
-				}
-
-				for i := 0; i < 4; i++ {
-					cmp, _ := campaignDao.Create(&types.Campaign{
-						BotID:   botBeta.ID,
-						Active:  true,
-						Title:   fmt.Sprintf("Title Beta-%d", i),
-						Message: fmt.Sprintf("Message Beta-%d", i),
-					})
-					campaignsBetaIDs = append(campaignsBetaIDs, cmp.ID)
-				}
-
-				takeAllCampaignsDeliveries := func(
+				takeDeliveriesForAnyCampaign := func(
 					botID int64,
 					campaignIDs []int64,
 					userIDs []int64,
 				) {
 					for i := 0; i < len(userIDs)*len(campaignIDs); i++ {
-						result, err := deliveryDao.Take(botID, 0)
+						result, err := deliveryDao.Take(botID, 0, 0)
 						assert.NilError(t, err)
 						fmt.Printf("%d %s\n", result.Delivery.CampaignID, result.User.DisplayName)
 
@@ -478,13 +489,49 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 						assert.Assert(t, result.Delivery.TelegramID == result.User.TelegramID)
 						assert.Assert(t, result.Delivery.State == types.DeliveryStateProgress)
 					}
-					resultNil, _ := deliveryDao.Take(botID, 0)
+					resultNil, _ := deliveryDao.Take(botID, 0, 0)
 					assert.Assert(t, resultNil == nil)
 				}
 
-				takeAllCampaignsDeliveries(botAlpha.ID, campaignsAlphaIDs, usersAlphaIDs)
-				takeAllCampaignsDeliveries(botBeta.ID, campaignsBetaIDs, usersBetaIDs)
+				{
+					usersAlphaIDs,
+						usersBetaIDs,
+						campaignsAlphaIDs,
+						campaignsBetaIDs,
+						botAlpha,
+						botBeta := prepareData()
+					takeDeliveriesForAnyCampaign(botAlpha.ID, campaignsAlphaIDs, usersAlphaIDs)
+					takeDeliveriesForAnyCampaign(botBeta.ID, campaignsBetaIDs, usersBetaIDs)
+				}
 
+				takeDeliveriesForSpecificUser := func(
+					botID int64,
+					userIDs []int64,
+					campaignIDs []int64,
+				) {
+					for _, telegramID := range userIDs {
+						for i := len(campaignIDs) - 1; i >= 0; i-- {
+							result, err := deliveryDao.Take(botID, 0, telegramID)
+							assert.NilError(t, err)
+							assert.Assert(t, result.Campaign.ID == campaignIDs[i])
+							assert.Assert(t, result.User.TelegramID == telegramID)
+						}
+						nilResult, err := deliveryDao.Take(botID, 0, telegramID)
+						assert.NilError(t, err)
+						assert.Assert(t, nilResult == nil)
+					}
+				}
+
+				{
+					usersAlphaIDs,
+						usersBetaIDs,
+						campaignsAlphaIDs,
+						campaignsBetaIDs,
+						botAlpha,
+						botBeta := prepareData()
+					takeDeliveriesForSpecificUser(botAlpha.ID, usersAlphaIDs, campaignsAlphaIDs)
+					takeDeliveriesForSpecificUser(botBeta.ID, usersBetaIDs, campaignsBetaIDs)
+				}
 			})
 			// #endregion
 

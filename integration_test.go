@@ -22,29 +22,29 @@ func TestLocalGorm(t *testing.T) {
 	}
 }
 
-// func TestClientServer(t *testing.T) {
-// 	//FIXME: this is wrong! Use lifecycle methods!!!
-// 	serverApp := fx.New(
-// 		createIntegrationTestConfigurationServer(),
-// 		createIntegrationTestServerInvocation(),
-// 	)
+func TestClientServer(t *testing.T) {
+	//FIXME: this is wrong! Use lifecycle methods!!!
+	serverApp := fx.New(
+		createIntegrationTestConfigurationServer(),
+		createIntegrationTestServerInvocation(),
+	)
 
-// 	started := make(chan bool)
-// 	go func() {
-// 		startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-// 		defer cancel()
-// 		if err := serverApp.Start(startCtx); err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		started <- true
-// 	}()
+	started := make(chan bool)
+	go func() {
+		startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := serverApp.Start(startCtx); err != nil {
+			log.Fatal(err)
+		}
+		started <- true
+	}()
 
-// 	select {
-// 	case <-started:
-// 	}
+	select {
+	case <-started:
+	}
 
-// 	fx.New(
-// 		createIntegrationTestConfigurationClient(),
-// 		createIntegrationTestInvocation(t),
-// 	)
-// }
+	fx.New(
+		createIntegrationTestConfigurationClient(),
+		createIntegrationTestInvocation(t),
+	)
+}

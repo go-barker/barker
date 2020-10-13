@@ -20,7 +20,7 @@ func NewDeliveryDaoImplResty(
 	}
 }
 
-func (this *DeliveryDaoImplResty) Take(botID int64, campaignID int64) (*dao.DeliveryTakeResult, error) {
+func (this *DeliveryDaoImplResty) Take(botID int64, campaignID int64, telegramID int64) (*dao.DeliveryTakeResult, error) {
 	resultWrapper := &struct {
 		Data *dao.DeliveryTakeResult
 	}{
@@ -39,6 +39,7 @@ func (this *DeliveryDaoImplResty) Take(botID int64, campaignID int64) (*dao.Deli
 			"BotID":      strconv.FormatInt(botID, 10),
 			"CampaignID": strconv.FormatInt(campaignID, 10),
 		}).
+		SetQueryParam("TelegramID", strconv.FormatInt(telegramID, 10)).
 		Post(url)
 	if err != nil {
 		return nil, err

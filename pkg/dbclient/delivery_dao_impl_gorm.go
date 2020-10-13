@@ -27,7 +27,7 @@ func NewDeliveryDaoImplGorm(
 	}
 }
 
-func (this *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*dao.DeliveryTakeResult, error) {
+func (this *DeliveryDaoImplGorm) Take(botID int64, campaignID int64, telegramID int64) (*dao.DeliveryTakeResult, error) {
 	errNoRecepients := errors.New("no recepients")
 
 	result := &dao.DeliveryTakeResult{
@@ -56,18 +56,17 @@ func (this *DeliveryDaoImplGorm) Take(botID int64, campaignID int64) (*dao.Deliv
 					"AND deliveries.bot_id = users.bot_id "+
 					"AND deliveries.campaign_id = campaigns.id",
 			).
-			// Joins(
-			// 	"left outer join deliveries on "+
-			// 		"deliveries.telegram_id = users.telegram_id "+
-			// 		"AND deliveries.bot_id = users.bot_id "+
-			// 		"AND deliveries.campaign_id = ?",
-			// 	campaignID).
 			Where("deliveries.telegram_id IS NULL").
 			Where("users.deleted_at IS NULL").
+			Where("campaigns.deleted_at IS NULL").
+			Where("campaigns.active = true").
 			Where("users.bot_id = ?", botID).
 			Order("campaigns.created_at DESC").
-			Limit(1).
-			Scan(resultModel)
+			Limit(1)
+		if telegramID != 0 {
+			query = query.Where("users.telegram_id = ?", telegramID)
+		}
+		query = query.Scan(resultModel)
 
 		if err := query.Error; err != nil {
 			return err

@@ -9,7 +9,7 @@ type DeliveryTakeResult struct {
 }
 
 type DeliveryDao interface {
-	Take(botID int64, campaignID int64) (*DeliveryTakeResult, error)
+	Take(botID int64, campaignID int64, telegramID int64) (*DeliveryTakeResult, error)
 	SetState(*types.Delivery, types.DeliveryState) error
 	GetState(*types.Delivery) (types.DeliveryState, error)
 }
