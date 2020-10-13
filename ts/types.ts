@@ -32,3 +32,8 @@ export interface Delivery {
     TelegramID?: number;
     State?: DeliveryState;
 }
+export interface DeliveryTakeResult {
+    Delivery?: Delivery;
+    Campaign?: Campaign;
+    User?: User;
+}

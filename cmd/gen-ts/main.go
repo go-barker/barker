@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/types"
 	"github.com/tkrajina/typescriptify-golang-structs/typescriptify"
 )
@@ -13,7 +14,8 @@ func main() {
 		Add(types.Campaign{}).
 		Add(types.User{}).
 		Add(types.Delivery{}).
-		AddEnum(types.AllDeliveryStates)
+		AddEnum(types.AllDeliveryStates).
+		Add(dao.DeliveryTakeResult{})
 
 	converter.CreateInterface = true
 	converter.BackupDir = os.TempDir()

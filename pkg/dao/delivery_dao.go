@@ -3,9 +3,9 @@ package dao
 import "github.com/corporateanon/barker/pkg/types"
 
 type DeliveryTakeResult struct {
-	Delivery *types.Delivery
-	Campaign *types.Campaign
-	User     *types.User
+	Delivery *types.Delivery `json:"Delivery,omitempty"`
+	Campaign *types.Campaign `json:"Campaign,omitempty"`
+	User     *types.User     `json:"User,omitempty"`
 }
 
 type DeliveryDao interface {
