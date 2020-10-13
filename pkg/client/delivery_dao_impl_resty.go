@@ -20,30 +20,33 @@ func NewDeliveryDaoImplResty(
 	}
 }
 
-func (dao *DeliveryDaoImplResty) Take(botID int64, campaignID int64) (*types.Delivery, *types.User, error) {
+func (this *DeliveryDaoImplResty) Take(botID int64, campaignID int64) (*dao.DeliveryTakeResult, error) {
 	resultWrapper := &struct {
-		Data *types.Delivery
-		User *types.User
+		Data *dao.DeliveryTakeResult
 	}{
-		Data: &types.Delivery{},
-		User: &types.User{},
+		Data: &dao.DeliveryTakeResult{},
 	}
 
-	res, err := dao.resty.R().
+	url := "/bot/{BotID}/campaign/{CampaignID}/delivery"
+	if campaignID == 0 {
+		url = "/bot/{BotID}/delivery"
+	}
+
+	res, err := this.resty.R().
 		SetError(&ErrorResponse{}).
 		SetResult(resultWrapper).
 		SetPathParams(map[string]string{
 			"BotID":      strconv.FormatInt(botID, 10),
 			"CampaignID": strconv.FormatInt(campaignID, 10),
 		}).
-		Post("/bot/{BotID}/campaign/{CampaignID}/delivery")
+		Post(url)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if httpErr := res.Error(); httpErr != nil {
-		return nil, nil, httpErr.(*ErrorResponse)
+		return nil, httpErr.(*ErrorResponse)
 	}
-	return resultWrapper.Data, resultWrapper.User, nil
+	return resultWrapper.Data, nil
 }
 
 func (dao *DeliveryDaoImplResty) SetState(delivery *types.Delivery, state types.DeliveryState) error {

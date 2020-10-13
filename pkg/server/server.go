@@ -198,6 +198,18 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
 		})
 
+		botRouter.POST("/delivery", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+			result, err := deliveryDao.Take(bot.ID, 0)
+			if err != nil {
+				c.JSON(http.StatusNotFound, nil)
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"data": result,
+			})
+		})
+
 		//--------
 
 		campaignRouter := botRouter.Group("/campaign/:CampaignID")
@@ -211,15 +223,13 @@ func NewHandler(
 			campaignRouter.POST("/delivery", func(c *gin.Context) {
 				campaign := c.MustGet("Campaign").(*types.Campaign)
 				bot := c.MustGet("Bot").(*types.Bot)
-				delivery, user, err := deliveryDao.Take(bot.ID, campaign.ID)
+				result, err := deliveryDao.Take(bot.ID, campaign.ID)
 				if err != nil {
 					c.JSON(http.StatusNotFound, nil)
 					return
 				}
 				c.JSON(http.StatusOK, gin.H{
-					"data":     delivery,
-					"campaign": campaign,
-					"user":     user,
+					"data": result,
 				})
 			})
 

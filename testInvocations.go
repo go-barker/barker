@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -312,6 +313,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					BotID:   botA.ID,
 					Title:   "Campaign A",
 					Message: "Campaign A",
+					Active:  true,
 				})
 				assert.NilError(t, err)
 
@@ -319,90 +321,173 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					BotID:   botB.ID,
 					Title:   "Campaign B",
 					Message: "Campaign B",
+					Active:  true,
 				})
 				assert.NilError(t, err)
 
 				//--------
 
-				deliveryA1, dUserA1, err := deliveryDao.Take(botA.ID, campaignA.ID)
+				resultA1, err := deliveryDao.Take(botA.ID, campaignA.ID)
 				assert.NilError(t, err)
-				assert.DeepEqual(t, deliveryA1, &types.Delivery{
+				assert.DeepEqual(t, resultA1.Delivery, &types.Delivery{
 					BotID:      botA.ID,
 					CampaignID: campaignA.ID,
 					State:      types.DeliveryStateProgress,
 					TelegramID: userA1.TelegramID,
 				})
-				assert.DeepEqual(t, dUserA1, userA1)
+				assert.DeepEqual(t, resultA1.User, userA1)
 
-				deliveryA2, dUserA2, err := deliveryDao.Take(botA.ID, campaignA.ID)
+				resultA2, err := deliveryDao.Take(botA.ID, campaignA.ID)
 				assert.NilError(t, err)
-				assert.DeepEqual(t, deliveryA2, &types.Delivery{
+				assert.DeepEqual(t, resultA2.Delivery, &types.Delivery{
 					BotID:      botA.ID,
 					CampaignID: campaignA.ID,
 					State:      types.DeliveryStateProgress,
 					TelegramID: userA2.TelegramID,
 				})
-				assert.DeepEqual(t, dUserA2, userA2)
+				assert.DeepEqual(t, resultA2.User, userA2)
 
-				deliveryA3, dUserA3, err := deliveryDao.Take(botA.ID, campaignA.ID)
+				resultA3, err := deliveryDao.Take(botA.ID, campaignA.ID)
 				assert.NilError(t, err)
-				assert.Assert(t, deliveryA3 == nil)
-				assert.Assert(t, dUserA3 == nil)
+				assert.Assert(t, resultA3 == nil)
 
 				//--------
 
-				deliveryB1, dUserB1, err := deliveryDao.Take(botB.ID, campaignB.ID)
+				resultB1, err := deliveryDao.Take(botB.ID, campaignB.ID)
 				assert.NilError(t, err)
-				assert.DeepEqual(t, deliveryB1, &types.Delivery{
+				assert.DeepEqual(t, resultB1.Delivery, &types.Delivery{
 					BotID:      botB.ID,
 					CampaignID: campaignB.ID,
 					State:      types.DeliveryStateProgress,
 					TelegramID: userB1.TelegramID,
 				})
-				assert.DeepEqual(t, dUserB1, userB1)
+				assert.DeepEqual(t, resultB1.User, userB1)
 
-				deliveryB2, dUserB2, err := deliveryDao.Take(botB.ID, campaignB.ID)
+				resultB2, err := deliveryDao.Take(botB.ID, campaignB.ID)
 				assert.NilError(t, err)
-				assert.DeepEqual(t, deliveryB2, &types.Delivery{
+				assert.DeepEqual(t, resultB2.Delivery, &types.Delivery{
 					BotID:      botB.ID,
 					CampaignID: campaignB.ID,
 					State:      types.DeliveryStateProgress,
 					TelegramID: userB2.TelegramID,
 				})
-				assert.DeepEqual(t, dUserB2, userB2)
+				assert.DeepEqual(t, resultB2.User, userB2)
 
-				deliveryB3, dUserB3, err := deliveryDao.Take(botB.ID, campaignB.ID)
+				resultB3, err := deliveryDao.Take(botB.ID, campaignB.ID)
 				assert.NilError(t, err)
-				assert.Assert(t, deliveryB3 == nil)
-				assert.Assert(t, dUserB3 == nil)
+				assert.Assert(t, resultB3 == nil)
 
 				t.Run("campaign does not belong to a bot", func(t *testing.T) {
-					wrongDelivery, wrongUser, _ := deliveryDao.Take(botA.ID, campaignB.ID)
+					wrongResult, _ := deliveryDao.Take(botA.ID, campaignB.ID)
 					//Error depends on an implementation.
 					//Gorm implementation does not return error.
 					//Resty implementation returns it, because campaign is checked against bot in HTTP request middleware.
-					assert.Assert(t, wrongDelivery == nil)
-					assert.Assert(t, wrongUser == nil)
+					assert.Assert(t, wrongResult == nil)
 				})
 
 				t.Run("update deliveries", func(t *testing.T) {
-					err := deliveryDao.SetState(deliveryA1, types.DeliveryStateSuccess)
+					err := deliveryDao.SetState(resultA1.Delivery, types.DeliveryStateSuccess)
 					assert.NilError(t, err)
 
-					deliveryA1UpdatedState, err := deliveryDao.GetState(deliveryA1)
+					deliveryA1UpdatedState, err := deliveryDao.GetState(resultA1.Delivery)
 					assert.Assert(t, deliveryA1UpdatedState == types.DeliveryStateSuccess)
 
-					deliveryA2UnchangedState, err := deliveryDao.GetState(deliveryA2)
+					deliveryA2UnchangedState, err := deliveryDao.GetState(resultA2.Delivery)
 					assert.Assert(t, deliveryA2UnchangedState == types.DeliveryStateProgress)
 
-					err = deliveryDao.SetState(deliveryA2, types.DeliveryStateFail)
+					err = deliveryDao.SetState(resultA2.Delivery, types.DeliveryStateFail)
 					assert.NilError(t, err)
 
-					deliveryA2UpdatedState, err := deliveryDao.GetState(deliveryA2)
+					deliveryA2UpdatedState, err := deliveryDao.GetState(resultA2.Delivery)
 					assert.Assert(t, deliveryA2UpdatedState == types.DeliveryStateFail)
 				})
 			})
 			// #endregion
+
+			// #region(collapsed) [advanced take deliveries]
+			t.Run("advanced take deliveries", func(t *testing.T) {
+				botAlpha, err := botDao.Create(&types.Bot{
+					Title: "Bot Alpha",
+					Token: "bot:alpha",
+				})
+				assert.NilError(t, err)
+				botBeta, err := botDao.Create(&types.Bot{
+					Title: "Bot Beta",
+					Token: "bot:beta",
+				})
+				assert.NilError(t, err)
+
+				usersAlphaIDs := []int64{}
+				usersBetaIDs := []int64{}
+
+				for i := 0; i < 10; i++ {
+					userAlpha, err := userDao.Put(&types.User{
+						DisplayName: fmt.Sprintf("Mass user Alpha-%d", i),
+						BotID:       botAlpha.ID,
+						TelegramID:  int64(i + 1000),
+					})
+					assert.NilError(t, err)
+					usersAlphaIDs = append(usersAlphaIDs, userAlpha.TelegramID)
+					userBeta, err := userDao.Put(&types.User{
+						DisplayName: fmt.Sprintf("Mass user Beta-%d", i),
+						BotID:       botBeta.ID,
+						TelegramID:  int64(i + 1000),
+					})
+					assert.NilError(t, err)
+					usersBetaIDs = append(usersBetaIDs, userBeta.TelegramID)
+				}
+
+				campaignsAlphaIDs := []int64{}
+				campaignsBetaIDs := []int64{}
+
+				for i := 0; i < 3; i++ {
+					cmp, _ := campaignDao.Create(&types.Campaign{
+						BotID:   botAlpha.ID,
+						Active:  true,
+						Title:   fmt.Sprintf("Title Alpha-%d", i),
+						Message: fmt.Sprintf("Message Alpha-%d", i),
+					})
+					campaignsAlphaIDs = append(campaignsAlphaIDs, cmp.ID)
+				}
+
+				for i := 0; i < 4; i++ {
+					cmp, _ := campaignDao.Create(&types.Campaign{
+						BotID:   botBeta.ID,
+						Active:  true,
+						Title:   fmt.Sprintf("Title Beta-%d", i),
+						Message: fmt.Sprintf("Message Beta-%d", i),
+					})
+					campaignsBetaIDs = append(campaignsBetaIDs, cmp.ID)
+				}
+
+				takeAllCampaignsDeliveries := func(
+					botID int64,
+					campaignIDs []int64,
+					userIDs []int64,
+				) {
+					for i := 0; i < len(userIDs)*len(campaignIDs); i++ {
+						result, err := deliveryDao.Take(botID, 0)
+						assert.NilError(t, err)
+						fmt.Printf("%d %s\n", result.Delivery.CampaignID, result.User.DisplayName)
+
+						assert.Assert(t, result.User.TelegramID == userIDs[i%len(userIDs)])
+						assert.Assert(t, result.User.BotID == botID)
+						assert.Assert(t, result.Campaign.ID == campaignIDs[len(campaignIDs)-1-i/len(userIDs)])
+						assert.Assert(t, result.Delivery.BotID == botID)
+						assert.Assert(t, result.Delivery.CampaignID == result.Campaign.ID)
+						assert.Assert(t, result.Delivery.TelegramID == result.User.TelegramID)
+						assert.Assert(t, result.Delivery.State == types.DeliveryStateProgress)
+					}
+					resultNil, _ := deliveryDao.Take(botID, 0)
+					assert.Assert(t, resultNil == nil)
+				}
+
+				takeAllCampaignsDeliveries(botAlpha.ID, campaignsAlphaIDs, usersAlphaIDs)
+				takeAllCampaignsDeliveries(botBeta.ID, campaignsBetaIDs, usersBetaIDs)
+
+			})
+			// #endregion
+
 		},
 	)
 }
