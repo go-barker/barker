@@ -39,9 +39,18 @@ func DeliveryStateFromString(in string) (DeliveryState, error) {
 	}
 }
 
+var AllDeliveryStates = []struct {
+	Value  DeliveryState
+	TSName string
+}{
+	{DeliveryStateProgress, "progress"},
+	{DeliveryStateFail, "fail"},
+	{DeliveryStateSuccess, "success"},
+}
+
 type Delivery struct {
-	CampaignID int64
-	BotID      int64
-	TelegramID int64
-	State      DeliveryState
+	CampaignID int64         `json:"CampaignID,omitempty"`
+	BotID      int64         `json:"BotID,omitempty"`
+	TelegramID int64         `json:"TelegramID,omitempty"`
+	State      DeliveryState `json:"State,omitempty"`
 }

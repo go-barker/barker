@@ -3,6 +3,7 @@ module github.com/corporateanon/barker
 go 1.13
 
 require (
+	github.com/OneOfOne/struct2ts v1.0.4 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/go-resty/resty/v2 v2.3.0
@@ -12,6 +13,8 @@ require (
 	github.com/my1562/telegrambot v0.2.1 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/tkrajina/go-reflector v0.5.4 // indirect
+	github.com/tkrajina/typescriptify-golang-structs v0.1.1
 	go.uber.org/fx v1.13.1
 	gopkg.in/jcmturner/aescts.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/dnsutils.v1 v1.0.1 // indirect
