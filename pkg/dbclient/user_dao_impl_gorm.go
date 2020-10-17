@@ -5,6 +5,7 @@ import (
 
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/pagination"
 	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
 )
@@ -72,4 +73,32 @@ func (dao *UserDaoImplGorm) Get(botID int64, telegramID int64) (*types.User, err
 	user := &types.User{}
 	userModel.ToEntity(user)
 	return user, nil
+}
+
+func (dao *UserDaoImplGorm) List(botID int64, pageRequest *types.PaginatorRequest) ([]types.User, *types.PaginatorResponse, error) {
+	userModelsList := []database.User{}
+	db := dao.db.Table("users").
+		Order("created_at DESC").
+		Where("bot_id = ?", botID)
+	resp := pagination.Paging(&pagination.Param{
+		DB:    db,
+		Page:  int(pageRequest.Page),
+		Limit: int(pageRequest.Size),
+	}, &userModelsList)
+
+	if err := db.Error; err != nil {
+		return nil, nil, err
+	}
+
+	usersList := make([]types.User, len(userModelsList))
+	for i, model := range userModelsList {
+		model.ToEntity(&usersList[i])
+	}
+	return usersList,
+		&types.PaginatorResponse{
+			Page:  resp.Page,
+			Size:  resp.Limit,
+			Total: resp.TotalPage,
+		},
+		nil
 }

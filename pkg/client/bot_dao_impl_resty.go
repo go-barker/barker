@@ -71,6 +71,22 @@ func (dao *BotDaoImplResty) Get(ID int64) (*types.Bot, error) {
 	return resultWrapper.Data, nil
 }
 
-func (dao *BotDaoImplResty) List() ([]types.Bot, error) {
-	panic("not implemented")
+func (dao *BotDaoImplResty) List(pageRequest *types.PaginatorRequest) ([]types.Bot, *types.PaginatorResponse, error) {
+	resultWrapper := &struct {
+		Data   []types.Bot
+		Paging *types.PaginatorResponse
+	}{}
+	pageRequestMap := pageRequest.ToMap()
+	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
+		SetResult(resultWrapper).
+		SetQueryParams(pageRequestMap).
+		Get("/bot")
+	if err != nil {
+		return nil, nil, err
+	}
+	if httpErr := res.Error(); httpErr != nil {
+		return nil, nil, httpErr.(*ErrorResponse)
+	}
+	return resultWrapper.Data, resultWrapper.Paging, nil
 }

@@ -31,6 +31,21 @@ func NewHandler(
 		c.JSON(http.StatusOK, gin.H{"data": resultingBot})
 	})
 
+	router.GET("/bot", func(c *gin.Context) {
+		pageRequest := &types.PaginatorRequest{}
+		if err := c.ShouldBind(pageRequest); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		bots, pageResponse, err := botDao.List(pageRequest)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": bots, "paging": pageResponse})
+	})
+
 	//-------------------------------------------
 	botRouter := router.Group("/bot/:BotID")
 	{
@@ -59,6 +74,22 @@ func NewHandler(
 			}
 
 			c.JSON(http.StatusOK, gin.H{"data": resultingBot})
+		})
+
+		botRouter.GET("/user", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+			pageRequest := &types.PaginatorRequest{}
+			if err := c.ShouldBind(pageRequest); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			users, pageResponse, err := userDao.List(bot.ID, pageRequest)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"data": users, "paging": pageResponse})
 		})
 
 		botRouter.PUT("/user", func(c *gin.Context) {
@@ -120,6 +151,22 @@ func NewHandler(
 			c.JSON(http.StatusOK, gin.H{"data": user})
 		})
 
+		botRouter.GET("/campaign", func(c *gin.Context) {
+			bot := c.MustGet("Bot").(*types.Bot)
+			pageRequest := &types.PaginatorRequest{}
+			if err := c.ShouldBind(pageRequest); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			users, pageResponse, err := campaignDao.List(bot.ID, pageRequest)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"data": users, "paging": pageResponse})
+		})
+
 		botRouter.POST("/campaign", func(c *gin.Context) {
 			bot := c.MustGet("Bot").(*types.Bot)
 
@@ -140,34 +187,6 @@ func NewHandler(
 
 			c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
 		})
-
-		// router.GET("/campaign/:id", func(c *gin.Context) {
-		// 	bot := c.MustGet("Bot").(*types.Bot)
-
-		// 	urlParams := &struct {
-		// 		ID int64 `uri:"id" binding:"required"`
-		// 	}{}
-		// 	if err := c.ShouldBindUri(urlParams); err != nil {
-		// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		// 		return
-		// 	}
-
-		// 	resultingCampaign, err := campaignDao.Get(urlParams.ID)
-		// 	if err != nil {
-		// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// 		return
-		// 	}
-		// 	if nil == resultingCampaign {
-		// 		c.JSON(http.StatusNotFound, nil)
-		// 		return
-		// 	}
-		// 	if resultingCampaign.BotID != bot.ID {
-		// 		c.JSON(http.StatusForbidden, nil)
-		// 		return
-		// 	}
-
-		// 	c.JSON(http.StatusOK, gin.H{"data": resultingCampaign})
-		// })
 
 		botRouter.PUT("/campaign/:CampaignID", func(c *gin.Context) {
 			bot := c.MustGet("Bot").(*types.Bot)

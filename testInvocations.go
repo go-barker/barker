@@ -535,6 +535,38 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 			})
 			// #endregion
 
+			t.Run("bot paging", func(t *testing.T) {
+				bots, pageResponse, err := botDao.List(&types.PaginatorRequest{Page: 1, Size: 2})
+				assert.NilError(t, err)
+				assert.Assert(t, len(bots) == 2)
+				assert.Assert(t, pageResponse.Total > 1)
+				assert.Assert(t, pageResponse.Size == 2)
+				assert.Assert(t, pageResponse.Page == 1)
+			})
+
+			t.Run("user paging", func(t *testing.T) {
+				bots, _, err := botDao.List(&types.PaginatorRequest{Page: 1, Size: 1})
+				assert.NilError(t, err)
+
+				users, pageResponse, err := userDao.List(bots[0].ID, &types.PaginatorRequest{Page: 1, Size: 2})
+				assert.NilError(t, err)
+				assert.Assert(t, len(users) == 2)
+				assert.Assert(t, pageResponse.Total > 1)
+				assert.Assert(t, pageResponse.Size == 2)
+				assert.Assert(t, pageResponse.Page == 1)
+			})
+
+			t.Run("campaign paging", func(t *testing.T) {
+				bots, _, err := botDao.List(&types.PaginatorRequest{Page: 1, Size: 1})
+				assert.NilError(t, err)
+
+				campaigns, pageResponse, err := campaignDao.List(bots[0].ID, &types.PaginatorRequest{Page: 1, Size: 2})
+				assert.NilError(t, err)
+				assert.Assert(t, len(campaigns) == 2)
+				assert.Assert(t, pageResponse.Total > 1)
+				assert.Assert(t, pageResponse.Size == 2)
+				assert.Assert(t, pageResponse.Page == 1)
+			})
 		},
 	)
 }

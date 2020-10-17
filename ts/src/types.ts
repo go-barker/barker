@@ -32,6 +32,15 @@ export interface Delivery {
     TelegramID?: number;
     State?: DeliveryState;
 }
+export interface PaginatorRequest {
+    Page?: number;
+    Size?: number;
+}
+export interface PaginatorResponse {
+    Page?: number;
+    Size?: number;
+    Total?: number;
+}
 export interface DeliveryTakeResult {
     Delivery?: Delivery;
     Campaign?: Campaign;

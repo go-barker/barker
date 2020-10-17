@@ -17,7 +17,7 @@ func createIntegrationTestConfigurationGorm() fx.Option {
 		dbclient.NewDeliveryDaoImplGorm,
 		dbclient.NewBotDaoImplGorm,
 		database.NewDatabase,
-		database.NewDialectorSQLiteMemory,
+		database.NewDialectorSQLiteMemoryClient,
 	)
 }
 
@@ -29,7 +29,7 @@ func createIntegrationTestConfigurationServer() fx.Option {
 		dbclient.NewDeliveryDaoImplGorm,
 		dbclient.NewBotDaoImplGorm,
 		database.NewDatabase,
-		database.NewDialectorSQLiteMemory,
+		database.NewDialectorSQLiteMemoryServer,
 	)
 }
 
@@ -40,8 +40,6 @@ func createIntegrationTestConfigurationClient() fx.Option {
 		client.NewUserDaoImplResty,
 		client.NewCampaignDaoImplResty,
 		client.NewDeliveryDaoImplResty,
-		database.NewDatabase,
-		database.NewDialectorSQLiteMemory,
 	)
 }
 

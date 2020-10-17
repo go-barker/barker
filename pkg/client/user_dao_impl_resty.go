@@ -55,3 +55,25 @@ func (dao *UserDaoImplResty) Get(botID int64, telegramID int64) (*types.User, er
 	}
 	return resultWrapper.Data, nil
 }
+
+func (dao *UserDaoImplResty) List(botID int64, pageRequest *types.PaginatorRequest) ([]types.User, *types.PaginatorResponse, error) {
+	resultWrapper := &struct {
+		Data   []types.User
+		Paging *types.PaginatorResponse
+	}{}
+	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
+		SetResult(resultWrapper).
+		SetQueryParams(pageRequest.ToMap()).
+		SetPathParams(map[string]string{
+			"BotID": strconv.FormatInt(botID, 10),
+		}).
+		Get("/bot/{BotID}/user")
+	if err != nil {
+		return nil, nil, err
+	}
+	if httpErr := res.Error(); httpErr != nil {
+		return nil, nil, httpErr.(*ErrorResponse)
+	}
+	return resultWrapper.Data, resultWrapper.Paging, nil
+}

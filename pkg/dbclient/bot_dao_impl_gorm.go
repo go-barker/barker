@@ -5,6 +5,7 @@ import (
 
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/pagination"
 	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
 )
@@ -68,6 +69,28 @@ func (dao *BotDaoImplGorm) Get(ID int64) (*types.Bot, error) {
 	return resultingBot, nil
 }
 
-func (dao *BotDaoImplGorm) List() ([]types.Bot, error) {
-	panic("not implemented")
+func (dao *BotDaoImplGorm) List(pageRequest *types.PaginatorRequest) ([]types.Bot, *types.PaginatorResponse, error) {
+	botModelsList := []database.Bot{}
+	db := dao.db.Table("bots").Order("created_at DESC")
+	resp := pagination.Paging(&pagination.Param{
+		DB:    db,
+		Page:  int(pageRequest.Page),
+		Limit: int(pageRequest.Size),
+	}, &botModelsList)
+
+	if err := db.Error; err != nil {
+		return nil, nil, err
+	}
+
+	botsList := make([]types.Bot, len(botModelsList))
+	for i, model := range botModelsList {
+		model.ToEntity(&botsList[i])
+	}
+	return botsList,
+		&types.PaginatorResponse{
+			Page:  resp.Page,
+			Size:  resp.Limit,
+			Total: resp.TotalPage,
+		},
+		nil
 }

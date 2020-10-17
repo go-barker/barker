@@ -76,6 +76,24 @@ func (dao *CampaignDaoImplResty) Get(botID int64, ID int64) (*types.Campaign, er
 	return resultWrapper.Data, nil
 }
 
-func (dao *CampaignDaoImplResty) List() ([]types.Campaign, error) {
-	panic("not implemented")
+func (dao *CampaignDaoImplResty) List(botID int64, pageRequest *types.PaginatorRequest) ([]types.Campaign, *types.PaginatorResponse, error) {
+	resultWrapper := &struct {
+		Data   []types.Campaign
+		Paging *types.PaginatorResponse
+	}{}
+	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
+		SetResult(resultWrapper).
+		SetQueryParams(pageRequest.ToMap()).
+		SetPathParams(map[string]string{
+			"BotID": strconv.FormatInt(botID, 10),
+		}).
+		Get("/bot/{BotID}/campaign")
+	if err != nil {
+		return nil, nil, err
+	}
+	if httpErr := res.Error(); httpErr != nil {
+		return nil, nil, httpErr.(*ErrorResponse)
+	}
+	return resultWrapper.Data, resultWrapper.Paging, nil
 }

@@ -5,25 +5,34 @@ import {
     DeliveryState,
     DeliveryTakeResult,
     User,
+    PaginatorResponse,
+    PaginatorRequest,
 } from './types';
 
 export interface BotDao {
     Create(bot: Bot): Promise<Bot>;
     Update(bot: Bot): Promise<Bot>;
     Get(botID: number): Promise<Bot>;
-    List(): Promise<Bot[]>;
+    List(pageRequest: PaginatorRequest): Promise<[Bot[], PaginatorResponse]>;
 }
 
 export interface CampaignDao {
     Create(campaign: Campaign): Promise<Campaign>;
     Update(campaign: Campaign): Promise<Campaign>;
     Get(botID: number, campaignID: number): Promise<Campaign>;
-    List(): Promise<Campaign[]>;
+    List(
+        botID: number,
+        pageRequest: PaginatorRequest
+    ): Promise<[Campaign[], PaginatorResponse]>;
 }
 
 export interface UserDao {
     Get(botID: number, telegramID: number): Promise<User>;
     Put(user: User): Promise<User>;
+    List(
+        botID: number,
+        pageRequest: PaginatorRequest
+    ): Promise<[User[], PaginatorResponse]>;
 }
 
 export interface DeliveryDao {

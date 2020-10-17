@@ -5,6 +5,7 @@ import (
 
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
+	"github.com/corporateanon/barker/pkg/pagination"
 	"github.com/corporateanon/barker/pkg/types"
 	"gorm.io/gorm"
 )
@@ -70,6 +71,30 @@ func (dao *CampaignDaoImplGorm) Get(botID int64, ID int64) (*types.Campaign, err
 	return resultingCampaign, nil
 }
 
-func (dao *CampaignDaoImplGorm) List() ([]types.Campaign, error) {
-	panic("not implemented")
+func (dao *CampaignDaoImplGorm) List(botID int64, pageRequest *types.PaginatorRequest) ([]types.Campaign, *types.PaginatorResponse, error) {
+	campaignModelsList := []database.Campaign{}
+	db := dao.db.Table("campaigns").
+		Order("created_at DESC").
+		Where("bot_id = ?", botID)
+	resp := pagination.Paging(&pagination.Param{
+		DB:    db,
+		Page:  int(pageRequest.Page),
+		Limit: int(pageRequest.Size),
+	}, &campaignModelsList)
+
+	if err := db.Error; err != nil {
+		return nil, nil, err
+	}
+
+	campaignsList := make([]types.Campaign, len(campaignModelsList))
+	for i, model := range campaignModelsList {
+		model.ToEntity(&campaignsList[i])
+	}
+	return campaignsList,
+		&types.PaginatorResponse{
+			Page:  resp.Page,
+			Size:  resp.Limit,
+			Total: resp.TotalPage,
+		},
+		nil
 }
