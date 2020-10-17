@@ -1,16 +1,17 @@
 import { AxiosInstance } from 'axios';
+import { BotDao, CampaignDao, DeliveryDao, UserDao } from './dao';
 import {
     BotDaoImplAxios,
     CampaignDaoImplAxios,
-    DeliveryDaoImplAxios,
     UserDaoImplAxios,
+    DeliveryDaoImplAxios,
 } from './dao_impl_axios';
 
 export class BarkerClient {
-    public readonly bot: BotDaoImplAxios;
-    public readonly user: UserDaoImplAxios;
-    public readonly campaign: CampaignDaoImplAxios;
-    public readonly delivery: DeliveryDaoImplAxios;
+    public readonly bot: BotDao;
+    public readonly user: UserDao;
+    public readonly campaign: CampaignDao;
+    public readonly delivery: DeliveryDao;
 
     constructor(private http: AxiosInstance) {
         this.bot = new BotDaoImplAxios(http);
@@ -19,3 +20,5 @@ export class BarkerClient {
         this.delivery = new DeliveryDaoImplAxios(http);
     }
 }
+
+export * from './types';

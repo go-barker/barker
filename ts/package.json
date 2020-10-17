@@ -2,7 +2,12 @@
     "name": "barker-api",
     "version": "0.0.1",
     "description": "",
-    "main": "index.js",
+    "main": "lib/BarkerClient.js",
+    "types": "lib/BarkerClient.d.ts",
+    "files": [
+        "lib",
+        "src"
+    ],
     "scripts": {
         "type-check": "tsc --noEmit",
         "type-check:watch": "npm run type-check -- --watch",
