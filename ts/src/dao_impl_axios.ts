@@ -189,6 +189,6 @@ export class DeliveryDaoImplAxios implements DeliveryDao {
                 telegramID: delivery.TelegramID,
             })
         );
-        return DeliveryState[data as string];
+        return DeliveryState[data as keyof typeof DeliveryState];
     }
 }
