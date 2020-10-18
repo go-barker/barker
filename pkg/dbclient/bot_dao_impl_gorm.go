@@ -88,9 +88,10 @@ func (dao *BotDaoImplGorm) List(pageRequest *types.PaginatorRequest) ([]types.Bo
 	}
 	return botsList,
 		&types.PaginatorResponse{
-			Page:  resp.Page,
-			Size:  resp.Limit,
-			Total: resp.TotalPage,
+			Page:       resp.Page,
+			Size:       resp.Limit,
+			Total:      resp.TotalPage,
+			TotalItems: resp.TotalRecord,
 		},
 		nil
 }

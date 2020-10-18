@@ -96,9 +96,10 @@ func (dao *UserDaoImplGorm) List(botID int64, pageRequest *types.PaginatorReques
 	}
 	return usersList,
 		&types.PaginatorResponse{
-			Page:  resp.Page,
-			Size:  resp.Limit,
-			Total: resp.TotalPage,
+			Page:       resp.Page,
+			Size:       resp.Limit,
+			Total:      resp.TotalPage,
+			TotalItems: resp.TotalRecord,
 		},
 		nil
 }

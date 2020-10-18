@@ -92,9 +92,10 @@ func (dao *CampaignDaoImplGorm) List(botID int64, pageRequest *types.PaginatorRe
 	}
 	return campaignsList,
 		&types.PaginatorResponse{
-			Page:  resp.Page,
-			Size:  resp.Limit,
-			Total: resp.TotalPage,
+			Page:       resp.Page,
+			Size:       resp.Limit,
+			Total:      resp.TotalPage,
+			TotalItems: resp.TotalRecord,
 		},
 		nil
 }

@@ -542,6 +542,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				assert.Assert(t, pageResponse.Total > 1)
 				assert.Assert(t, pageResponse.Size == 2)
 				assert.Assert(t, pageResponse.Page == 1)
+				assert.Assert(t, pageResponse.TotalItems/pageResponse.Size == pageResponse.Total)
 			})
 
 			t.Run("user paging", func(t *testing.T) {
@@ -554,6 +555,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				assert.Assert(t, pageResponse.Total > 1)
 				assert.Assert(t, pageResponse.Size == 2)
 				assert.Assert(t, pageResponse.Page == 1)
+				assert.Assert(t, pageResponse.TotalItems/pageResponse.Size == pageResponse.Total)
 			})
 
 			t.Run("campaign paging", func(t *testing.T) {
@@ -566,6 +568,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				assert.Assert(t, pageResponse.Total > 1)
 				assert.Assert(t, pageResponse.Size == 2)
 				assert.Assert(t, pageResponse.Page == 1)
+				assert.Assert(t, pageResponse.TotalItems/pageResponse.Size == pageResponse.Total)
 			})
 		},
 	)

@@ -40,6 +40,7 @@ export interface PaginatorResponse {
     Page?: number;
     Size?: number;
     Total?: number;
+    TotalItems?: number;
 }
 export interface DeliveryTakeResult {
     Delivery?: Delivery;

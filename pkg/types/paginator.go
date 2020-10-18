@@ -15,7 +15,8 @@ func (p *PaginatorRequest) ToMap() map[string]string {
 }
 
 type PaginatorResponse struct {
-	Page  int `json:"Page,omitempty"`
-	Size  int `json:"Size,omitempty"`
-	Total int `json:"Total,omitempty"`
+	Page       int `json:"Page,omitempty"`
+	Size       int `json:"Size,omitempty"`
+	Total      int `json:"Total,omitempty"`
+	TotalItems int `json:"TotalItems,omitempty"`
 }
