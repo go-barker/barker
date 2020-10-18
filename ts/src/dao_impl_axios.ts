@@ -10,7 +10,7 @@ import {
     Delivery,
     DeliveryState,
 } from './types';
-import { parse as U } from 'url-template';
+import U from 'url-template';
 
 export class BotDaoImplAxios implements BotDao {
     constructor(private http: AxiosInstance) {}
@@ -26,7 +26,7 @@ export class BotDaoImplAxios implements BotDao {
         const {
             data: { data },
         } = await this.http.put(
-            U('/bot/{BotID}').expand({ BotID: bot.ID }),
+            U.parse('/bot/{BotID}').expand({ BotID: bot.ID }),
             bot
         );
         return data;
@@ -35,7 +35,9 @@ export class BotDaoImplAxios implements BotDao {
     public async Get(botID: number): Promise<Bot> {
         const {
             data: { data },
-        } = await this.http.get(U('/bot/{BotID}').expand({ BotID: botID }));
+        } = await this.http.get(
+            U.parse('/bot/{BotID}').expand({ BotID: botID })
+        );
         return data;
     }
 
@@ -58,7 +60,10 @@ export class UserDaoImplAxios implements UserDao {
         const {
             data: { data },
         } = await this.http.get(
-            U('/bot/{botID}/user/{telegramID}').expand({ botID, telegramID })
+            U.parse('/bot/{botID}/user/{telegramID}').expand({
+                botID,
+                telegramID,
+            })
         );
         return data;
     }
@@ -67,7 +72,7 @@ export class UserDaoImplAxios implements UserDao {
         const {
             data: { data },
         } = await this.http.put(
-            U('/bot/{botID}/user').expand({ botID: user.BotID })
+            U.parse('/bot/{botID}/user').expand({ botID: user.BotID })
         );
         return data;
     }
@@ -78,9 +83,12 @@ export class UserDaoImplAxios implements UserDao {
     ): Promise<[User[], PaginatorResponse]> {
         const {
             data: { data, paging },
-        } = await this.http.get(U('/bot/{botID}/user').expand({ botID }), {
-            params: pageRequest,
-        });
+        } = await this.http.get(
+            U.parse('/bot/{botID}/user').expand({ botID }),
+            {
+                params: pageRequest,
+            }
+        );
         return [data, paging];
     }
 }
@@ -92,7 +100,7 @@ export class CampaignDaoImplAxios implements CampaignDao {
         const {
             data: { data },
         } = await this.http.post(
-            U('/bot/{botID}/campaign').expand({ botID: campaign.BotID }),
+            U.parse('/bot/{botID}/campaign').expand({ botID: campaign.BotID }),
             campaign
         );
         return data;
@@ -102,7 +110,7 @@ export class CampaignDaoImplAxios implements CampaignDao {
         const {
             data: { data },
         } = await this.http.put(
-            U('/bot/{botID}/campaign/{campaignID}').expand({
+            U.parse('/bot/{botID}/campaign/{campaignID}').expand({
                 botID: campaign.BotID,
                 campaignID: campaign.ID,
             }),
@@ -115,7 +123,7 @@ export class CampaignDaoImplAxios implements CampaignDao {
         const {
             data: { data },
         } = await this.http.get(
-            U('/bot/{botID}/campaign/{campaignID}').expand({
+            U.parse('/bot/{botID}/campaign/{campaignID}').expand({
                 botID: botID,
                 campaignID: campaignID,
             })
@@ -129,9 +137,12 @@ export class CampaignDaoImplAxios implements CampaignDao {
     ): Promise<[Campaign[], PaginatorResponse]> {
         const {
             data: { data, paging },
-        } = await this.http.get(U('/bot/{botID}/campaign').expand({ botID }), {
-            params: pageRequest,
-        });
+        } = await this.http.get(
+            U.parse('/bot/{botID}/campaign').expand({ botID }),
+            {
+                params: pageRequest,
+            }
+        );
         return [data, paging];
     }
 }
@@ -151,7 +162,7 @@ export class DeliveryDaoImplAxios implements DeliveryDao {
         const {
             data: { data },
         } = await this.http.post(
-            U(url).expand({
+            U.parse(url).expand({
                 botID,
                 campaignID,
             }),
@@ -166,7 +177,7 @@ export class DeliveryDaoImplAxios implements DeliveryDao {
         state: DeliveryState
     ): Promise<void> {
         await this.http.put(
-            U(
+            U.parse(
                 '/bot/{botID}/campaign/{campaignID}/delivery/{telegramID}/state/{state}'
             ).expand({
                 botID: delivery.BotID,
@@ -181,7 +192,7 @@ export class DeliveryDaoImplAxios implements DeliveryDao {
         const {
             data: { data },
         } = await this.http.get(
-            U(
+            U.parse(
                 '/bot/{botID}/campaign/{campaignID}/delivery/{telegramID}/state'
             ).expand({
                 botID: delivery.BotID,
