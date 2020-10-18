@@ -1,6 +1,6 @@
 {
     "name": "barker-api",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "",
     "main": "lib/BarkerClient.js",
     "types": "lib/BarkerClient.d.ts",
@@ -13,7 +13,8 @@
         "type-check:watch": "npm run type-check -- --watch",
         "build": "npm run build:types && npm run build:js",
         "build:types": "tsc --emitDeclarationOnly",
-        "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline"
+        "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+        "prepublish": "npm run build"
     },
     "author": "",
     "license": "ISC",
