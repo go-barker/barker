@@ -1,15 +1,18 @@
 import React from 'react';
-import BotsPage from './bots/BotsPage';
+import { BotsPage } from './bots/BotsPage';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 import BotPage from './bots/BotPage';
 import { BotLoader, NewBotLoader } from './bots/BotLoader';
+import { BotsListLoader } from './bots/BotsListLoader';
 
 function App() {
     return (
         <HashRouter>
             <Switch>
                 <Route exact path="/">
-                    <BotsPage />
+                    <BotsListLoader
+                        render={(props) => <BotsPage {...props} />}
+                    />
                 </Route>
                 <Route exact path="/bots/new">
                     <NewBotLoader

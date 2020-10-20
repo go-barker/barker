@@ -1,53 +1,53 @@
-import { Bot, PaginatorResponse } from 'barker-api';
-import React, { useState } from 'react';
-import useSWR from 'swr';
-import { fetcher } from '../fetcher';
-import BotsListAppBar from './BotsListAppBar';
 import {
     Grid,
-    Typography,
     Table,
-    TableHead,
-    TableCell,
-    TableRow,
     TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
 } from '@material-ui/core';
+import { Bot, PaginatorResponse } from 'barker-api';
+import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
+import { Pagination } from '../Pagination';
+import BotsListAppBar from './BotsListAppBar';
 
-function BotsPage() {
-    const [page, setPage] = useState(1);
-    const [size, setSize] = useState(10);
+export interface BotsPageProps {
+    items?: Bot[];
+    error?: any;
+    paging?: PaginatorResponse;
+}
 
-    const { data: [bots, paging] = [], error } = useSWR<
-        [Bot[], PaginatorResponse]
-    >(['bot.List', size, page], fetcher);
-
+export const BotsPage: FC<BotsPageProps> = ({ items, error, paging }) => {
     if (error) return <div>failed to load</div>;
-    if (!bots) return <div>loading...</div>;
+    if (!items) return <div>loading...</div>;
     return (
         <Grid container>
             <BotsListAppBar />
-
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Title</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {bots.map((bot, i) => (
-                        <TableRow key={i}>
-                            <TableCell>{bot.ID}</TableCell>
-                            <TableCell>
-                                <Link to={`/bots/${bot.ID}`}>{bot.Title}</Link>
-                            </TableCell>
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell width="100%">Title</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHead>
+                    <TableBody>
+                        {items.map((item, i) => (
+                            <TableRow key={i}>
+                                <TableCell>{item.ID}</TableCell>
+                                <TableCell>
+                                    <Link to={`/bots/${item.ID}`}>
+                                        {item.Title}
+                                    </Link>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            {paging && <Pagination paging={paging} />}
         </Grid>
     );
-}
-
-export default BotsPage;
+};

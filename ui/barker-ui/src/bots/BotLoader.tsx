@@ -5,10 +5,7 @@ import useSWR from 'swr';
 import { fetcher, barker } from '../fetcher';
 
 export interface BotLoaderProps {
-    render: ({
-        bot,
-        error,
-    }: {
+    render: (props: {
         bot?: Bot;
         error?: any;
         onSubmit: (bot: Bot) => Promise<void>;
