@@ -28,7 +28,6 @@ function BotsPage() {
         <Grid container>
             <BotsListAppBar />
 
-            <Typography variant="h4">Bots</Typography>
             <Table>
                 <TableHead>
                     <TableRow>
