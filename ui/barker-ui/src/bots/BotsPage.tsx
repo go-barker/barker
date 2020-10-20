@@ -2,6 +2,7 @@ import { Bot, PaginatorResponse } from 'barker-api';
 import React, { useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '../fetcher';
+import BotsListAppBar from './BotsListAppBar';
 import {
     Grid,
     Typography,
@@ -25,6 +26,8 @@ function BotsPage() {
     if (!bots) return <div>loading...</div>;
     return (
         <Grid container>
+            <BotsListAppBar />
+
             <Typography variant="h4">Bots</Typography>
             <Table>
                 <TableHead>
