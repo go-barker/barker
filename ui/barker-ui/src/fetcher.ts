@@ -9,47 +9,40 @@ import {
 
 export const barker = new BarkerClient(Axios);
 
-export function fetcher(
-    key: 'bot.List',
-    size: number,
-    page: number
-): Promise<[Bot[], PaginatorResponse]>;
-export function fetcher(key: 'bot.Get', botID: number): Promise<Bot>;
-export function fetcher(
-    key: 'campaign.List',
-    size: number,
-    page: number,
-    botID: number
-): Promise<[Campaign[], PaginatorResponse]>;
-export function fetcher(
-    key: 'user.List',
-    size: number,
-    page: number,
-    botID: number
-): Promise<[User[], PaginatorResponse]>;
-export function fetcher(
-    key: 'bot.List' | 'bot.Get' | 'campaign.List' | 'user.List',
+interface TypeMap {
+    'bot.Get': Promise<Bot>;
+    'bot.List': Promise<[Bot[], PaginatorResponse]>;
+    'user.List': Promise<[User[], PaginatorResponse]>;
+    'campaign.List': Promise<[Campaign[], PaginatorResponse]>;
+}
+
+type ReturnedType<K extends keyof TypeMap> = K extends keyof TypeMap
+    ? TypeMap[K]
+    : never;
+
+export function fetcher<K extends keyof TypeMap, R extends ReturnedType<K>>(
+    key: K,
     ...args: (string | number)[]
-) {
+): R {
     switch (key) {
         case 'bot.List': {
             const [size, page] = args as number[];
-            return barker.bot.List({ Page: page, Size: size });
+            return <R>barker.bot.List({ Page: page, Size: size });
         }
         case 'user.List': {
             const [size, page, botID] = args as number[];
-            return barker.user.List(botID, { Page: page, Size: size });
+            return <R>barker.user.List(botID, { Page: page, Size: size });
         }
         case 'campaign.List': {
             const [size, page, botID] = args as number[];
-            return barker.campaign.List(botID, {
+            return <R>barker.campaign.List(botID, {
                 Page: page,
                 Size: size,
             });
         }
         case 'bot.Get': {
             const [botID] = args as number[];
-            return barker.bot.Get(botID);
+            return <R>barker.bot.Get(botID);
         }
         default:
             throw new Error('Bad key');
