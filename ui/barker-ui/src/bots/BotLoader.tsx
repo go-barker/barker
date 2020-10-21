@@ -12,8 +12,11 @@ export interface BotLoaderProps {
     }) => ReactElement;
 }
 export const BotLoader: FC<BotLoaderProps> = ({ render }) => {
-    const { id } = useParams();
-    const { data: bot, error, mutate } = useSWR<Bot>(['bot.Get', id], fetcher);
+    const { botID } = useParams();
+    const { data: bot, error, mutate } = useSWR<Bot>(
+        ['bot.Get', botID],
+        fetcher
+    );
     const onSubmit = async (bot: Bot) => {
         await mutate(barker.bot.Update(bot), false);
     };

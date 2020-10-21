@@ -1,5 +1,5 @@
 import React from 'react';
-import { BotsPage } from './bots/BotsPage';
+import { BotsListPage } from './bots/BotsListPage';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 import BotPage from './bots/BotPage';
 import { BotLoader, NewBotLoader } from './bots/BotLoader';
@@ -11,7 +11,7 @@ function App() {
             <Switch>
                 <Route exact path="/">
                     <BotsListLoader
-                        render={(props) => <BotsPage {...props} />}
+                        render={(props) => <BotsListPage {...props} />}
                     />
                 </Route>
                 <Route exact path="/bots/new">
@@ -21,17 +21,17 @@ function App() {
                         )}
                     />
                 </Route>
-                <Route exact path="/bots/:id">
+                <Route exact path="/bots/:botID">
                     <BotLoader
                         render={(props) => <BotPage tab="edit" {...props} />}
                     />
                 </Route>
-                <Route exact path="/bots/:id/users">
+                <Route exact path="/bots/:botID/users">
                     <BotLoader
                         render={(props) => <BotPage tab="users" {...props} />}
                     />
                 </Route>
-                <Route exact path="/bots/:id/campaigns">
+                <Route exact path="/bots/:botID/campaigns">
                     <BotLoader
                         render={(props) => (
                             <BotPage tab="campaigns" {...props} />

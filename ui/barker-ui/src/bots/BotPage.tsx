@@ -1,13 +1,12 @@
-import { Button, Grid, Typography, Paper, makeStyles } from '@material-ui/core';
+import { Grid, makeStyles, Paper } from '@material-ui/core';
 import { Bot } from 'barker-api';
-import { Field, Form, Formik } from 'formik';
-import { TextField } from 'formik-material-ui';
 import React, { FC } from 'react';
-import { mutate } from 'swr';
-import { barker } from '../fetcher';
-import { useHistory } from 'react-router-dom';
+import { UsersListLoader } from '../users/UsersListLoader';
+import { UsersListPage } from '../users/UsersListPage';
 import BotAppBar from './BotAppBar';
 import BotEditForm from './BotEditForm';
+import { CampaignsListLoader } from '../campaigns/CampaignsListLoader';
+import { CampaignsListPage } from '../campaigns/CampaignsListPage';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -43,6 +42,16 @@ export const BotPage: FC<BotPageProps> = ({
             <Paper className={classes.paper}>
                 {tab === 'edit' && (
                     <BotEditForm onSubmit={onSubmit} bot={bot} />
+                )}
+                {tab === 'users' && (
+                    <UsersListLoader
+                        render={(props) => <UsersListPage {...props} />}
+                    />
+                )}
+                {tab === 'campaigns' && (
+                    <CampaignsListLoader
+                        render={(props) => <CampaignsListPage {...props} />}
+                    />
                 )}
             </Paper>
         </Grid>
