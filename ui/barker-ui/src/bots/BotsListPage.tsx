@@ -1,18 +1,9 @@
-import {
-    Grid,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-} from '@material-ui/core';
+import { Grid, TableCell } from '@material-ui/core';
 import { Bot, PaginatorResponse } from 'barker-api';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { Pagination } from '../Pagination';
-import BotsListAppBar from './BotsListAppBar';
 import { createListView } from '../createListView';
+import BotsListAppBar from './BotsListAppBar';
 
 export interface BotsPageProps {
     items?: Bot[];

@@ -4,6 +4,8 @@ import { HashRouter, Switch, Route } from 'react-router-dom';
 import BotPage from './bots/BotPage';
 import { BotLoader, NewBotLoader } from './bots/BotLoader';
 import { BotsListLoader } from './bots/BotsListLoader';
+import CampaignPage from './campaigns/CampaignPage';
+import { CampaignLoader, NewCampaignLoader } from './campaigns/CampaignLoader';
 
 function App() {
     return (
@@ -36,6 +38,16 @@ function App() {
                         render={(props) => (
                             <BotPage tab="campaigns" {...props} />
                         )}
+                    />
+                </Route>
+                <Route exact path="/bots/:botID/campaigns/new">
+                    <NewCampaignLoader
+                        render={(props) => <CampaignPage {...props} />}
+                    />
+                </Route>
+                <Route exact path="/bots/:botID/campaigns/:campaignID">
+                    <CampaignLoader
+                        render={(props) => <CampaignPage {...props} />}
                     />
                 </Route>
             </Switch>

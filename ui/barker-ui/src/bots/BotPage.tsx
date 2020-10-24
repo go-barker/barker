@@ -37,7 +37,12 @@ export const BotPage: FC<BotPageProps> = ({
 
     return (
         <Grid container>
-            <BotAppBar bot={bot} isNew={isNew} tab={tab} />
+            <BotAppBar
+                botID={bot.ID ?? 0}
+                isNew={isNew}
+                tab={tab}
+                title={isNew ? 'New bot' : `Bot: ${bot.Title || '<untitled>'}`}
+            />
 
             <Paper className={classes.paper}>
                 {tab === 'edit' && (
