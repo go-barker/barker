@@ -16,6 +16,10 @@ func NewHandler(
 	botDao dao.BotDao,
 ) *gin.Engine {
 	router := gin.Default()
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/ui/")
+	})
+	router.Static("/ui/", "./ui/build")
 
 	router.POST("/bot", func(c *gin.Context) {
 		bot := &types.Bot{}
