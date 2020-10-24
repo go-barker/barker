@@ -39,7 +39,16 @@ export const NewCampaignLoader: FC<CampaignLoaderProps> = ({ render }) => {
     const { botID } = useParams();
     const onSubmit = async (campaign: Campaign) => {
         const newCampaign = await barker.campaign.Create(campaign);
-        history.push(`/bots/${newCampaign.BotID}/campaigns/${campaign.ID}`);
+        history.push(`/bots/${newCampaign.BotID}/campaigns/${newCampaign.ID}`);
     };
-    return render({ campaign: { BotID: botID }, error: null, onSubmit });
+    const { data: bot, error: botError } = useSWR<Bot>(
+        ['bot.Get', botID],
+        fetcher
+    );
+    return render({
+        campaign: { BotID: parseInt(botID, 10) },
+        bot,
+        error: botError,
+        onSubmit,
+    });
 };

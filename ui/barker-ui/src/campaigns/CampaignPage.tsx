@@ -25,7 +25,6 @@ export const CampaignPage: FC<CampaignPageProps> = ({
     bot,
 }) => {
     const classes = useStyles();
-
     if (error) {
         return <div>failed to load</div>;
     }

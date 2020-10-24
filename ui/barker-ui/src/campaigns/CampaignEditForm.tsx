@@ -1,7 +1,7 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, FormControlLabel } from '@material-ui/core';
 import { Bot, Campaign } from 'barker-api';
 import { Field, Form, Formik } from 'formik';
-import { TextField, Switch } from 'formik-material-ui';
+import { TextField, CheckboxWithLabel } from 'formik-material-ui';
 import React, { FC } from 'react';
 
 export interface CampaignEditFormProps {
@@ -46,9 +46,9 @@ const CampaignEditForm: FC<CampaignEditFormProps> = ({
                             </Grid>
                             <Grid item xs={12}>
                                 <Field
-                                    component={Switch}
+                                    component={CheckboxWithLabel}
                                     type="checkbox"
-                                    label="Active"
+                                    Label={{ label: 'Active' }}
                                     name="Active"
                                 />
                             </Grid>

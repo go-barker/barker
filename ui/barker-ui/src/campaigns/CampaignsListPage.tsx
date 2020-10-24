@@ -1,7 +1,7 @@
-import { Grid, TableCell } from '@material-ui/core';
+import { Grid, TableCell, Button } from '@material-ui/core';
 import { Campaign, PaginatorResponse } from 'barker-api';
 import React, { FC } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { createListView } from '../createListView';
 
 export interface CampaignsListPageProps {
@@ -38,8 +38,17 @@ export const CampaignsListPage: FC<CampaignsListPageProps> = ({
     error,
     paging,
 }) => {
+    const { botID } = useParams();
     return (
         <Grid container>
+            <Button
+                color="secondary"
+                variant="contained"
+                component={Link}
+                to={`/bots/${botID}/campaigns/new`}
+            >
+                Create campaign
+            </Button>
             <CampaignsListView items={items} error={error} paging={paging} />
         </Grid>
     );
