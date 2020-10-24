@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"testing"
 
@@ -20,7 +21,12 @@ func createIntegrationTestServerInvocation() fx.Option {
 	) {
 		lc.Append(fx.Hook{
 			OnStart: func(c context.Context) error {
-				go http.ListenAndServe(":3000", r)
+				listener, err := net.Listen("tcp", ":3000")
+				if err != nil {
+					return err
+				}
+
+				go http.Serve(listener, r)
 				return nil
 			},
 		})

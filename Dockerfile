@@ -18,7 +18,7 @@ FROM node:12-alpine AS frontBuilder
 WORKDIR /app
 COPY ui ui
 ENV PUBLIC_URL=/ui
-RUN cd ui && npm run build
+RUN cd ui && npm ci && npm run build
 
 #final stage
 FROM alpine:latest
