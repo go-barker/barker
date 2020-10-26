@@ -97,3 +97,25 @@ func (dao *CampaignDaoImplResty) List(botID int64, pageRequest *types.PaginatorR
 	}
 	return resultWrapper.Data, resultWrapper.Paging, nil
 }
+
+func (dao *CampaignDaoImplResty) GetAggregatedStatistics(botID int64, campaignID int64) (*types.CampaignAggregatedStatistics, error) {
+	resultWrapper := &struct {
+		Data *types.CampaignAggregatedStatistics
+	}{Data: &types.CampaignAggregatedStatistics{}}
+	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
+		SetResult(resultWrapper).
+		SetPathParams(map[string]string{
+			"BotID":      strconv.FormatInt(botID, 10),
+			"CampaignID": strconv.FormatInt(campaignID, 10),
+		}).
+		Get("/bot/{BotID}/campaign/{CampaignID}/aggregatedStatistics")
+	if err != nil {
+		return nil, err
+	}
+	if httpErr := res.Error(); httpErr != nil {
+		return nil, httpErr.(*ErrorResponse)
+	}
+	return resultWrapper.Data, nil
+
+}

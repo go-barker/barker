@@ -18,6 +18,13 @@ export interface Campaign {
     Message?: string;
     Active?: boolean;
 }
+export interface CampaignAggregatedStatistics {
+    Users?: number;
+    Delivered?: number;
+    Errors?: number;
+    Pending?: number;
+    TimedOut?: number;
+}
 export interface User {
     FirstName?: string;
     LastName?: string;

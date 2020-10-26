@@ -407,6 +407,19 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					deliveryA2UpdatedState, err := deliveryDao.GetState(resultA2.Delivery)
 					assert.Assert(t, deliveryA2UpdatedState == types.DeliveryStateFail)
 				})
+
+				t.Run("campaign stat", func(t *testing.T) {
+					stat, err := campaignDao.GetAggregatedStatistics(campaignA.ID, campaignA.BotID)
+					assert.NilError(t, err)
+					fmt.Println(stat)
+					assert.DeepEqual(t, stat, &types.CampaignAggregatedStatistics{
+						Users:     2,
+						Delivered: 1,
+						Errors:    1,
+						Pending:   0,
+						TimedOut:  0,
+					})
+				})
 			})
 			// #endregion
 
@@ -541,6 +554,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 			})
 			// #endregion
 
+			// #region(collapsed) [paging]
 			t.Run("bot paging", func(t *testing.T) {
 				bots, pageResponse, err := botDao.List(&types.PaginatorRequest{Page: 1, Size: 2})
 				assert.NilError(t, err)
@@ -576,6 +590,8 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				assert.Assert(t, pageResponse.Page == 1)
 				assert.Assert(t, pageResponse.TotalItems/pageResponse.Size == pageResponse.Total)
 			})
+			// #endregion
+
 		},
 	)
 }

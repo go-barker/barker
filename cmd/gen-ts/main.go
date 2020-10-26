@@ -12,6 +12,7 @@ func main() {
 	converter := typescriptify.New().
 		Add(types.Bot{}).
 		Add(types.Campaign{}).
+		Add(types.CampaignAggregatedStatistics{}).
 		Add(types.User{}).
 		Add(types.Delivery{}).
 		Add(types.PaginatorRequest{}).

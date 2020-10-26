@@ -7,6 +7,7 @@ import {
     User,
     PaginatorResponse,
     PaginatorRequest,
+    CampaignAggregatedStatistics,
 } from './types';
 
 export interface BotDao {
@@ -20,6 +21,10 @@ export interface CampaignDao {
     Create(campaign: Campaign): Promise<Campaign>;
     Update(campaign: Campaign): Promise<Campaign>;
     Get(botID: number, campaignID: number): Promise<Campaign>;
+    GetAggregatedStatistics(
+        botID: number,
+        campaignID: number
+    ): Promise<CampaignAggregatedStatistics>;
     List(
         botID: number,
         pageRequest: PaginatorRequest

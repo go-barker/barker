@@ -9,6 +9,7 @@ import {
     DeliveryTakeResult,
     Delivery,
     DeliveryState,
+    CampaignAggregatedStatistics,
 } from './types';
 import U from 'url-template';
 
@@ -124,8 +125,25 @@ export class CampaignDaoImplAxios implements CampaignDao {
             data: { data },
         } = await this.http.get(
             U.parse('/bot/{botID}/campaign/{campaignID}').expand({
-                botID: botID,
-                campaignID: campaignID,
+                botID,
+                campaignID,
+            })
+        );
+        return data;
+    }
+
+    public async GetAggregatedStatistics(
+        botID: number,
+        campaignID: number
+    ): Promise<CampaignAggregatedStatistics> {
+        const {
+            data: { data },
+        } = await this.http.get(
+            U.parse(
+                '/bot/{botID}/campaign/{campaignID}/aggregatedStatistics'
+            ).expand({
+                botID,
+                campaignID,
             })
         );
         return data;

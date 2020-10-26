@@ -251,6 +251,16 @@ func NewHandler(
 				c.JSON(http.StatusOK, gin.H{"data": campaign})
 			})
 
+			campaignRouter.GET("/aggregatedStatistics", func(c *gin.Context) {
+				campaign := c.MustGet("Campaign").(*types.Campaign)
+				stat, err := campaignDao.GetAggregatedStatistics(campaign.BotID, campaign.ID)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				c.JSON(http.StatusOK, gin.H{"data": stat})
+			})
+
 			campaignRouter.POST("/delivery", func(c *gin.Context) {
 				campaign := c.MustGet("Campaign").(*types.Campaign)
 				bot := c.MustGet("Bot").(*types.Bot)

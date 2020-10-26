@@ -99,3 +99,45 @@ func (dao *CampaignDaoImplGorm) List(botID int64, pageRequest *types.PaginatorRe
 		},
 		nil
 }
+
+func (dao *CampaignDaoImplGorm) GetAggregatedStatistics(botID int64, campaignID int64) (*types.CampaignAggregatedStatistics, error) {
+	campaign, err := dao.Get(botID, campaignID)
+	if err != nil {
+		return nil, err
+	}
+	if campaign == nil {
+		return nil, errors.New("Campaign does not exist")
+	}
+
+	var usersCount, deliveredCount, errorsCount, pendingCount int64
+
+	if err = dao.db.Table("users").Where("bot_id = ?", botID).Count(&usersCount).Error; err != nil {
+		return nil, err
+	}
+	if err = dao.db.Table("deliveries").
+		Where("campaign_id = ?", campaignID).
+		Where("state = ?", types.DeliveryStateSuccess).
+		Count(&deliveredCount).Error; err != nil {
+		return nil, err
+	}
+	if err = dao.db.Table("deliveries").
+		Where("campaign_id = ?", campaignID).
+		Where("state = ?", types.DeliveryStateFail).
+		Count(&errorsCount).Error; err != nil {
+		return nil, err
+	}
+	if err = dao.db.Table("deliveries").
+		Where("campaign_id = ?", campaignID).
+		Where("state = ?", types.DeliveryStateProgress).
+		Count(&pendingCount).Error; err != nil {
+		return nil, err
+	}
+
+	return &types.CampaignAggregatedStatistics{
+		Delivered: deliveredCount,
+		Errors:    errorsCount,
+		Pending:   pendingCount,
+		Users:     usersCount,
+		TimedOut:  0,
+	}, nil
+}

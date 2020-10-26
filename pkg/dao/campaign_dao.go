@@ -7,4 +7,5 @@ type CampaignDao interface {
 	Update(campaign *types.Campaign) (*types.Campaign, error)
 	Get(botID int64, ID int64) (*types.Campaign, error)
 	List(botID int64, pageRequest *types.PaginatorRequest) ([]types.Campaign, *types.PaginatorResponse, error)
+	GetAggregatedStatistics(botID int64, campaignID int64) (*types.CampaignAggregatedStatistics, error)
 }
