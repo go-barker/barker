@@ -11,6 +11,7 @@ import { CampaignsListPage } from '../campaigns/CampaignsListPage';
 const useStyles = makeStyles((theme) => ({
     paper: {
         padding: theme.spacing(2),
+        width: '100%',
     },
 }));
 

@@ -1,9 +1,16 @@
-import { Grid, TableCell } from '@material-ui/core';
+import { Grid, makeStyles, Paper, TableCell } from '@material-ui/core';
 import { Bot, PaginatorResponse } from 'barker-api';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { createListView } from '../createListView';
 import BotsListAppBar from './BotsListAppBar';
+
+const useStyles = makeStyles((theme) => ({
+    paper: {
+        width: '100%',
+        padding: theme.spacing(2),
+    },
+}));
 
 export interface BotsPageProps {
     items?: Bot[];
@@ -29,10 +36,13 @@ const BotsListView = createListView<Bot>({
 });
 
 export const BotsListPage: FC<BotsPageProps> = ({ items, error, paging }) => {
+    const classes = useStyles();
     return (
         <Grid container>
             <BotsListAppBar />
-            <BotsListView items={items} error={error} paging={paging} />
+            <Paper className={classes.paper}>
+                <BotsListView items={items} error={error} paging={paging} />
+            </Paper>
         </Grid>
     );
 };
