@@ -18,7 +18,7 @@ export const Pagination: FC<PaginationProps> = ({ paging }) => {
             ...query,
             search: qs.stringify({ page: page + 1 }),
         });
-    }, []);
+    }, [history, query]);
 
     const handleChangeRowsPerPage = useCallback((event) => {
         history.push({
@@ -28,7 +28,7 @@ export const Pagination: FC<PaginationProps> = ({ paging }) => {
                 size: parseInt(event.target.value, 10),
             }),
         });
-    }, []);
+    }, [history, query]);
 
     return (
         <TablePagination

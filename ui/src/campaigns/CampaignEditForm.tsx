@@ -1,7 +1,7 @@
-import { Button, Grid, FormControlLabel } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { Bot, Campaign } from 'barker-api';
 import { Field, Form, Formik } from 'formik';
-import { TextField, CheckboxWithLabel } from 'formik-material-ui';
+import { CheckboxWithLabel, TextField } from 'formik-material-ui';
 import React, { FC } from 'react';
 
 export interface CampaignEditFormProps {

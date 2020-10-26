@@ -1,4 +1,3 @@
-import { Bot } from 'barker-api';
 import React, { FC } from 'react';
 import NavigationBar, { NavigationBarTab } from '../NavigationBar';
 

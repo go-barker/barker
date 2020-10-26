@@ -28,26 +28,26 @@ export function fetcher<K extends keyof TypeMap, R extends ReturnedType<K>>(
     switch (key) {
         case 'bot.List': {
             const [size, page] = args as number[];
-            return <R>barker.bot.List({ Page: page, Size: size });
+            return barker.bot.List({ Page: page, Size: size }) as R;
         }
         case 'user.List': {
             const [size, page, botID] = args as number[];
-            return <R>barker.user.List(botID, { Page: page, Size: size });
+            return barker.user.List(botID, { Page: page, Size: size }) as R;
         }
         case 'campaign.List': {
             const [size, page, botID] = args as number[];
-            return <R>barker.campaign.List(botID, {
+            return barker.campaign.List(botID, {
                 Page: page,
                 Size: size,
-            });
+            }) as R;
         }
         case 'bot.Get': {
             const [botID] = args as number[];
-            return <R>barker.bot.Get(botID);
+            return barker.bot.Get(botID) as R;
         }
         case 'campaign.Get': {
             const [botID, campaignID] = args as number[];
-            return <R>barker.campaign.Get(botID, campaignID);
+            return barker.campaign.Get(botID, campaignID) as R;
         }
         default:
             throw new Error('Bad key');

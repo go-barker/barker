@@ -3,7 +3,7 @@ import NavigationBar, { NavigationBarTab } from '../NavigationBar';
 
 export interface BotsListAppBarProps {}
 
-const BotsListAppBar: FC<BotsListAppBarProps> = ({}) => {
+const BotsListAppBar: FC<BotsListAppBarProps> = () => {
     const tabs: NavigationBarTab[] = [
         {
             label: 'Bots',
