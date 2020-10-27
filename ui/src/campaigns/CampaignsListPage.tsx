@@ -38,7 +38,7 @@ export const CampaignsListPage: FC<CampaignsListPageProps> = ({
     error,
     paging,
 }) => {
-    const { botID } = useParams();
+    const { botID } = useParams<{ botID?: string }>();
     return (
         <Grid container>
             <Button

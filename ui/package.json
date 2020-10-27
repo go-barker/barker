@@ -16,7 +16,7 @@
         "@types/react": "^16.9.53",
         "@types/react-dom": "^16.9.8",
         "@types/react-router-dom": "^5.1.6",
-        "barker-api": "0.0.7",
+        "barker-api": "0.0.10",
         "formik": "^2.2.0",
         "formik-material-ui": "^3.0.0",
         "react": "^16.14.0",
@@ -24,7 +24,8 @@
         "react-router-dom": "^5.2.0",
         "react-scripts": "3.4.3",
         "swr": "^0.3.5",
-        "typescript": "^3.7.5"
+        "typescript": "^4.0.5",
+        "victory": "^35.3.1"
     },
     "scripts": {
         "start": "react-scripts start",

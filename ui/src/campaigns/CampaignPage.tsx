@@ -1,8 +1,9 @@
 import { Grid, makeStyles, Paper } from '@material-ui/core';
-import { Campaign, Bot } from 'barker-api';
+import { Bot, Campaign } from 'barker-api';
 import React, { FC } from 'react';
 import BotAppBar from '../bots/BotAppBar';
 import CampaignEditForm from './CampaignEditForm';
+import { CampaignStatWidget } from './CampaignStatWidget';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -43,7 +44,22 @@ export const CampaignPage: FC<CampaignPageProps> = ({
             />
 
             <Paper className={classes.paper}>
-                <CampaignEditForm onSubmit={onSubmit} campaign={campaign} />
+                <Grid container>
+                    <Grid item xs={12} sm={6}>
+                        <CampaignEditForm
+                            onSubmit={onSubmit}
+                            campaign={campaign}
+                        />
+                    </Grid>
+                    {!isNew && campaign.BotID && campaign.ID && (
+                        <Grid item xs={12} sm={6}>
+                            <CampaignStatWidget
+                                botID={campaign.BotID}
+                                campaignID={campaign.ID}
+                            />
+                        </Grid>
+                    )}
+                </Grid>
             </Paper>
         </Grid>
     );

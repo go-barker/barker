@@ -31,11 +31,7 @@ export interface CreateListLoaderOptions {
 export function createListLoader<K extends KeyType>(key: K) {
     return ({ render }: ListLoaderProps<CreatedEntity<K>>) => {
         const { page = 1, size = 10 } = useQuery();
-        const { botID } = useParams();
-
-        // const { data: [items, paging] = [], error } = useSWR<
-        //     [CreatedEntity<K>[], PaginatorResponse]
-        // >([key, size, page, botID], fetcher);
+        const { botID } = useParams<{ botID?: string }>();
 
         const { data: [items, paging] = [], error } = useSWR(
             [key, size, page, botID],

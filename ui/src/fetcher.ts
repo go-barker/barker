@@ -3,6 +3,7 @@ import {
     BarkerClient,
     Bot,
     Campaign,
+    CampaignAggregatedStatistics,
     PaginatorResponse,
     User,
 } from 'barker-api';
@@ -12,6 +13,7 @@ export const barker = new BarkerClient(Axios);
 interface TypeMap {
     'bot.Get': Promise<Bot>;
     'campaign.Get': Promise<Campaign>;
+    'campaign.GetAggregatedStatistics': Promise<CampaignAggregatedStatistics>;
     'bot.List': Promise<[Bot[], PaginatorResponse]>;
     'user.List': Promise<[User[], PaginatorResponse]>;
     'campaign.List': Promise<[Campaign[], PaginatorResponse]>;
@@ -48,6 +50,13 @@ export function fetcher<K extends keyof TypeMap, R extends ReturnedType<K>>(
         case 'campaign.Get': {
             const [botID, campaignID] = args as number[];
             return barker.campaign.Get(botID, campaignID) as R;
+        }
+        case 'campaign.GetAggregatedStatistics': {
+            const [botID, campaignID] = args as number[];
+            return barker.campaign.GetAggregatedStatistics(
+                botID,
+                campaignID
+            ) as R;
         }
         default:
             throw new Error('Bad key');

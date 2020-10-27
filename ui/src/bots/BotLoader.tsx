@@ -12,7 +12,7 @@ export interface BotLoaderProps {
     }) => ReactElement;
 }
 export const BotLoader: FC<BotLoaderProps> = ({ render }) => {
-    const { botID } = useParams();
+    const { botID } = useParams<{ botID?: string }>();
     const { data: bot, error, mutate } = useSWR<Bot>(
         ['bot.Get', botID],
         fetcher

@@ -411,7 +411,6 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 				t.Run("campaign stat", func(t *testing.T) {
 					stat, err := campaignDao.GetAggregatedStatistics(campaignA.ID, campaignA.BotID)
 					assert.NilError(t, err)
-					fmt.Println(stat)
 					assert.DeepEqual(t, stat, &types.CampaignAggregatedStatistics{
 						Users:     2,
 						Delivered: 1,
