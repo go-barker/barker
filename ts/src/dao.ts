@@ -15,7 +15,7 @@ export interface BotDao {
     Update(bot: Bot): Promise<Bot>;
     Get(botID: number): Promise<Bot>;
     List(pageRequest: PaginatorRequest): Promise<[Bot[], PaginatorResponse]>;
-    RRTake(): Promise<Bot>
+    RRTake(): Promise<Bot>;
 }
 
 export interface CampaignDao {
