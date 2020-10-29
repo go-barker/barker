@@ -89,6 +89,26 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 			})
 			// #endregion
 
+			// #region(collapsed) [bot RRTake]
+			t.Run("bot RRTake", func(t *testing.T) {
+				bot1, err := botDao.RRTake()
+				assert.NilError(t, err)
+				assert.Assert(t, bot1.ID == 1)
+
+				bot2, err := botDao.RRTake()
+				assert.NilError(t, err)
+				assert.Assert(t, bot2.ID == 2)
+
+				bot3, err := botDao.RRTake()
+				assert.NilError(t, err)
+				assert.Assert(t, bot3.ID == 1)
+
+				bot4, err := botDao.RRTake()
+				assert.NilError(t, err)
+				assert.Assert(t, bot4.ID == 2)
+			})
+			// #endregion
+
 			// #region(collapsed) [create users]
 			t.Run("create users", func(t *testing.T) {
 				user1, err := userDao.Put(&types.User{

@@ -90,3 +90,18 @@ func (dao *BotDaoImplResty) List(pageRequest *types.PaginatorRequest) ([]types.B
 	}
 	return resultWrapper.Data, resultWrapper.Paging, nil
 }
+
+func (dao *BotDaoImplResty) RRTake() (*types.Bot, error) {
+	resultWrapper := &struct{ Data *types.Bot }{Data: &types.Bot{}}
+	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
+		SetResult(resultWrapper).
+		Post("/rr/bot")
+	if err != nil {
+		return nil, err
+	}
+	if httpErr := res.Error(); httpErr != nil {
+		return nil, httpErr.(*ErrorResponse)
+	}
+	return resultWrapper.Data, nil
+}

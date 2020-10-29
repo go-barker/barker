@@ -2,6 +2,7 @@ package dbclient
 
 import (
 	"errors"
+	"time"
 
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
@@ -94,4 +95,25 @@ func (dao *BotDaoImplGorm) List(pageRequest *types.PaginatorRequest) ([]types.Bo
 			TotalItems: resp.TotalRecord,
 		},
 		nil
+}
+
+func (dao *BotDaoImplGorm) RRTake() (*types.Bot, error) {
+
+	bot := &types.Bot{}
+
+	if err := dao.db.Transaction(func(tx *gorm.DB) error {
+		botModel := &database.Bot{}
+		if err := tx.Order("rr_access_time ASC").First(botModel).Error; err != nil {
+			return err
+		}
+		botModel.ToEntity(bot)
+		if err := tx.Model(botModel).Update("rr_access_time", time.Now()).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return bot, nil
 }

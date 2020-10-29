@@ -52,6 +52,13 @@ export class BotDaoImplAxios implements BotDao {
         });
         return [data, paging];
     }
+
+    public async RRTake(): Promise<Bot> {
+        const {
+            data: { data },
+        } = await this.http.post('/rr/bot');
+        return data;
+    }
 }
 
 export class UserDaoImplAxios implements UserDao {

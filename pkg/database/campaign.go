@@ -11,7 +11,7 @@ type Campaign struct {
 	BotID   int64 `gorm:"index"`
 	Title   string
 	Message string
-	Active  bool
+	Active  bool `gorm:"index"`
 }
 
 func (model *Campaign) ToEntity(entity *types.Campaign) {

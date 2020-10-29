@@ -35,6 +35,15 @@ func NewHandler(
 		c.JSON(http.StatusOK, gin.H{"data": resultingBot})
 	})
 
+	router.POST("/rr/bot", func(c *gin.Context) {
+		resultingBot, err := botDao.RRTake()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": resultingBot})
+	})
+
 	router.GET("/bot", func(c *gin.Context) {
 		pageRequest := &types.PaginatorRequest{}
 		if err := c.ShouldBind(pageRequest); err != nil {

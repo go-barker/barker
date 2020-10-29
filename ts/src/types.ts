@@ -10,6 +10,8 @@ export interface Bot {
     ID?: number;
     Title?: string;
     Token?: string;
+    RRAccessTime?: string;
+    RRPossiblyEmpty?: boolean;
 }
 export interface Campaign {
     ID?: number;
