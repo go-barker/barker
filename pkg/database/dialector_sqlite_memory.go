@@ -12,3 +12,7 @@ func NewDialectorSQLiteMemoryClient() gorm.Dialector {
 func NewDialectorSQLiteMemoryServer() gorm.Dialector {
 	return sqlite.Open("file:server.db?mode=memory&cache=shared")
 }
+
+func NewDialectorSQLiteMemoryRoundRobin() gorm.Dialector {
+	return sqlite.Open("file:roundRobin.db?mode=memory&cache=shared")
+}

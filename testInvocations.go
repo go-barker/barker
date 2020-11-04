@@ -614,3 +614,65 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 		},
 	)
 }
+
+func createIntegrationTestRoundRobinInvocation(t *testing.T) fx.Option {
+	return fx.Invoke(func(
+		botDao dao.BotDao,
+		deliveryDao dao.DeliveryDao,
+		userDao dao.UserDao,
+		campaignDao dao.CampaignDao) {
+		for i := 0; i < 10; i++ {
+			bot, err := botDao.Create(&types.Bot{
+				Title: fmt.Sprintf("Bot %d", i+1),
+				Token: fmt.Sprintf("Token %d", i+1),
+			})
+			assert.NilError(t, err)
+
+			for j := 0; j < 10; j++ {
+				userDao.Put(&types.User{
+					DisplayName: fmt.Sprintf("User %d", i),
+					TelegramID:  int64(1000 + i + 1),
+					BotID:       bot.ID,
+				})
+			}
+
+			for j := 0; j < 2; j++ {
+				campaignDao.Create(&types.Campaign{
+					BotID:   bot.ID,
+					Title:   fmt.Sprintf("Campaign %d", i),
+					Message: fmt.Sprintf("Message %d", i),
+					Active:  true,
+				})
+			}
+		}
+
+		t.Run("Take one bot, create a failed delivery, take the others, then make sure this bot is not taken again", func(t *testing.T) {
+			//Take one bot (1)
+			firstBot, err := botDao.RRTake()
+			assert.NilError(t, err)
+			assert.Assert(t, firstBot.ID == 1)
+
+			//create a failed delivery
+			firstDTR, err := deliveryDao.Take(firstBot.ID, 0, 0)
+			assert.NilError(t, err)
+			assert.Assert(t, firstDTR.Delivery.CampaignID == 2)
+
+			err = deliveryDao.SetState(firstDTR.Delivery, types.DeliveryStateFail)
+			assert.NilError(t, err)
+
+			//take the others (2...10)
+			var i int64
+			for i = 2; i <= 10; i++ {
+				nextBot, err := botDao.RRTake()
+				assert.NilError(t, err)
+				assert.Assert(t, nextBot.ID == i)
+			}
+
+			//Take one bot after all ten are taken
+			nextCycleFirstBot, err := botDao.RRTake()
+			assert.NilError(t, err)
+			//Make sure the bot with a failed delivery is not taken again
+			assert.Assert(t, nextCycleFirstBot.ID != 1)
+		})
+	})
+}

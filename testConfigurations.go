@@ -10,6 +10,17 @@ import (
 	"go.uber.org/fx"
 )
 
+func createIntegrationTestConfigurationRoundRobin() fx.Option {
+	return fx.Provide(
+		dbclient.NewUserDaoImplGorm,
+		dbclient.NewCampaignDaoImplGorm,
+		dbclient.NewDeliveryDaoImplGorm,
+		dbclient.NewBotDaoImplGorm,
+		database.NewDatabase,
+		database.NewDialectorSQLiteMemoryRoundRobin,
+	)
+}
+
 func createIntegrationTestConfigurationGorm() fx.Option {
 	return fx.Provide(
 		dbclient.NewUserDaoImplGorm,

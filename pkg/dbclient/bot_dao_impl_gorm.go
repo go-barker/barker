@@ -103,7 +103,14 @@ func (dao *BotDaoImplGorm) RRTake() (*types.Bot, error) {
 
 	if err := dao.db.Transaction(func(tx *gorm.DB) error {
 		botModel := &database.Bot{}
-		if err := tx.Order("rr_access_time ASC").First(botModel).Error; err != nil {
+		if err := tx.Order("rr_access_time ASC").
+			Where(
+				"rr_possibly_empty = ? OR rr_access_time < ?",
+				false,
+				//TODO: unhardcode the timeout
+				time.Now().Add(time.Duration(-1)*time.Minute),
+			).
+			First(botModel).Error; err != nil {
 			return err
 		}
 		botModel.ToEntity(bot)

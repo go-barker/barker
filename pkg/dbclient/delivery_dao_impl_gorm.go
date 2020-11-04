@@ -2,6 +2,7 @@ package dbclient
 
 import (
 	"errors"
+	"time"
 
 	"github.com/corporateanon/barker/pkg/dao"
 	"github.com/corporateanon/barker/pkg/database"
@@ -28,13 +29,13 @@ func NewDeliveryDaoImplGorm(
 }
 
 func (this *DeliveryDaoImplGorm) Take(botID int64, campaignID int64, telegramID int64) (*dao.DeliveryTakeResult, error) {
-	errNoRecepients := errors.New("no recepients")
-
 	result := &dao.DeliveryTakeResult{
 		Delivery: &types.Delivery{},
 		User:     &types.User{},
 		Campaign: &types.Campaign{},
 	}
+
+	recipientsNotFound := false
 
 	err := this.db.Transaction(func(tx *gorm.DB) error {
 		type resultWrapper struct {
@@ -72,7 +73,11 @@ func (this *DeliveryDaoImplGorm) Take(botID int64, campaignID int64, telegramID 
 			return err
 		}
 		if resultModel.ID == 0 {
-			return errNoRecepients
+			recipientsNotFound = true
+			if err := this.updateBotPossiblyEmptyStatus(tx, botID, true); err != nil {
+				return err
+			}
+			return nil
 		}
 
 		deliveryModel := &database.Delivery{
@@ -93,14 +98,18 @@ func (this *DeliveryDaoImplGorm) Take(botID int64, campaignID int64, telegramID 
 		deliveryModel.ToEntity(result.Delivery)
 		resultModel.ToEntity(result.User)
 
+		if err := this.updateBotPossiblyEmptyStatus(tx, botID, false); err != nil {
+			return err
+		}
+
 		return nil
 	})
 
 	if err != nil {
-		if errors.Is(err, errNoRecepients) {
-			return nil, nil
-		}
 		return nil, err
+	}
+	if recipientsNotFound {
+		return nil, nil
 	}
 
 	return result, nil
@@ -113,12 +122,23 @@ func (dao *DeliveryDaoImplGorm) SetState(delivery *types.Delivery, state types.D
 		return errors.New("Wrong delivery state")
 	}
 
-	return dao.db.Model(&database.Delivery{}).
-		Where("bot_id = ? AND campaign_id = ? AND telegram_id = ?",
-			delivery.BotID,
-			delivery.CampaignID,
-			delivery.TelegramID).
-		Update("state", state).Error
+	return dao.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&database.Delivery{}).
+			Where("bot_id = ? AND campaign_id = ? AND telegram_id = ?",
+				delivery.BotID,
+				delivery.CampaignID,
+				delivery.TelegramID).
+			Update("state", state).Error; err != nil {
+			return err
+		}
+		if state == types.DeliveryStateProgress {
+			return nil
+		}
+		if err := dao.updateBotPossiblyEmptyStatus(tx, delivery.BotID, state != types.DeliveryStateProgress); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (dao *DeliveryDaoImplGorm) GetState(delivery *types.Delivery) (types.DeliveryState, error) {
@@ -133,4 +153,19 @@ func (dao *DeliveryDaoImplGorm) GetState(delivery *types.Delivery) (types.Delive
 		return 0, query.Error
 	}
 	return result.State, nil
+}
+
+func (dao *DeliveryDaoImplGorm) updateBotPossiblyEmptyStatus(tx *gorm.DB, botID int64, isPossiblyEmpty bool) error {
+	if err := tx.
+		Table("bots").
+		Where("id = ?", botID).
+		Updates(
+			map[string]interface{}{
+				"rr_possibly_empty": isPossiblyEmpty,
+				"rr_access_time":    time.Now(),
+			},
+		).Error; err != nil {
+		return err
+	}
+	return nil
 }
