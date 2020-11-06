@@ -134,7 +134,7 @@ func (dao *DeliveryDaoImplGorm) SetState(delivery *types.Delivery, state types.D
 		if state == types.DeliveryStateProgress {
 			return nil
 		}
-		if err := dao.updateBotPossiblyEmptyStatus(tx, delivery.BotID, state != types.DeliveryStateProgress); err != nil {
+		if err := dao.updateBotPossiblyEmptyStatus(tx, delivery.BotID, state == types.DeliveryStateFail); err != nil {
 			return err
 		}
 		return nil

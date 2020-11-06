@@ -14,7 +14,7 @@ function statToPieChart(
         // TimedOut: timedOut = 0,
         Users: users = 0,
     } = stat;
-    const left = users - (errors - pending - delivered);
+    const left = users - errors - pending - delivered;
     return [
         {
             x: 'Left',
@@ -24,7 +24,7 @@ function statToPieChart(
         {
             x: 'Delivered',
             y: delivered,
-            fill: 'rgb(0%, 78.4%, 32.5%)',
+            fill: 'rgb(21.5%, 77.7%, 44.8%)',
         },
         {
             x: 'Pending',
@@ -34,7 +34,7 @@ function statToPieChart(
         {
             x: 'Error',
             y: errors,
-            fill: 'rgb(83.5%, 0%, 0%)',
+            fill: 'rgb(82.3%, 31.8%, 31.8%)',
         },
     ].filter((d) => d.y);
 }
