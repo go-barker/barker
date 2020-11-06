@@ -101,6 +101,8 @@ func (dao *BotDaoImplGorm) RRTake() (*types.Bot, error) {
 
 	bot := &types.Bot{}
 
+	errNoBot := errors.New("no bot")
+
 	if err := dao.db.Transaction(func(tx *gorm.DB) error {
 		botModel := &database.Bot{}
 		if err := tx.Order("rr_access_time ASC").
@@ -111,6 +113,9 @@ func (dao *BotDaoImplGorm) RRTake() (*types.Bot, error) {
 				time.Now().Add(time.Duration(-1)*time.Minute),
 			).
 			First(botModel).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errNoBot
+			}
 			return err
 		}
 		botModel.ToEntity(bot)
@@ -119,6 +124,9 @@ func (dao *BotDaoImplGorm) RRTake() (*types.Bot, error) {
 		}
 		return nil
 	}); err != nil {
+		if errors.Is(err, errNoBot) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
