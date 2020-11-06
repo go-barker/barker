@@ -1,6 +1,6 @@
 {
     "name": "barker-api",
-    "version": "0.0.15",
+    "version": "0.0.16",
     "description": "",
     "main": "lib/BarkerClient.js",
     "types": "lib/BarkerClient.d.ts",
