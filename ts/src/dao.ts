@@ -14,6 +14,7 @@ export interface BotDao {
     Create(bot: Bot): Promise<Bot>;
     Update(bot: Bot): Promise<Bot>;
     Get(botID: number): Promise<Bot>;
+    GetByToken(token: string): Promise<Bot>;
     List(pageRequest: PaginatorRequest): Promise<[Bot[], PaginatorResponse]>;
     RRTake(): Promise<Bot>;
 }

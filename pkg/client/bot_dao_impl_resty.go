@@ -71,6 +71,24 @@ func (dao *BotDaoImplResty) Get(ID int64) (*types.Bot, error) {
 	return resultWrapper.Data, nil
 }
 
+func (dao *BotDaoImplResty) GetByToken(token string) (*types.Bot, error) {
+	resultWrapper := &struct{ Data *types.Bot }{Data: &types.Bot{}}
+	res, err := dao.resty.R().
+		SetError(&ErrorResponse{}).
+		SetResult(resultWrapper).
+		SetPathParams(map[string]string{
+			"token": token,
+		}).
+		Get("/bot-by-token/{token}")
+	if err != nil {
+		return nil, err
+	}
+	if httpErr := res.Error(); httpErr != nil {
+		return nil, httpErr.(*ErrorResponse)
+	}
+	return resultWrapper.Data, nil
+}
+
 func (dao *BotDaoImplResty) List(pageRequest *types.PaginatorRequest) ([]types.Bot, *types.PaginatorResponse, error) {
 	resultWrapper := &struct {
 		Data   []types.Bot

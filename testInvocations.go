@@ -86,6 +86,29 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					Token: "world",
 				})
 
+				t.Run("By token", func(t *testing.T) {
+					bot1, err := botDao.GetByToken("hello")
+					assert.NilError(t, err)
+
+					assert.DeepEqual(t, bot1, &types.Bot{
+						ID:    1,
+						Title: "hello_bot",
+						Token: "hello",
+					})
+
+					bot2, err := botDao.GetByToken("world")
+					assert.NilError(t, err)
+
+					assert.DeepEqual(t, bot2, &types.Bot{
+						ID:    2,
+						Title: "world_bot",
+						Token: "world",
+					})
+
+					notExistingBot, err := botDao.GetByToken("notExistingToken")
+					assert.Assert(t, notExistingBot == nil)
+				})
+
 			})
 			// #endregion
 

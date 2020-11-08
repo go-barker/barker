@@ -59,6 +59,36 @@ func NewHandler(
 		c.JSON(http.StatusOK, gin.H{"data": bots, "paging": pageResponse})
 	})
 
+	router.GET("/bot-by-token/:Token", func(c *gin.Context) {
+		params := &struct {
+			Token string `uri:"Token"`
+		}{}
+		if err := c.ShouldBindUri(params); err != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": err},
+			)
+			return
+		}
+		bot, err := botDao.GetByToken(params.Token)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{"error": err},
+			)
+			return
+		}
+		if bot == nil {
+			c.AbortWithStatusJSON(
+				http.StatusNotFound,
+				gin.H{"error": "Bot not found"},
+			)
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": bot})
+
+	})
+
 	//-------------------------------------------
 	botRouter := router.Group("/bot/:BotID")
 	{

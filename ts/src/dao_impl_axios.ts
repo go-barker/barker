@@ -42,6 +42,15 @@ export class BotDaoImplAxios implements BotDao {
         return data;
     }
 
+    public async GetByToken(token: string): Promise<Bot> {
+        const {
+            data: { data },
+        } = await this.http.get(
+            U.parse('/bot-by-token/{token}').expand({ Token: token })
+        );
+        return data;
+    }
+
     public async List(
         pageRequest: PaginatorRequest
     ): Promise<[Bot[], PaginatorResponse]> {

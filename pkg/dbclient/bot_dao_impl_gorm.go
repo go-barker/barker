@@ -65,7 +65,22 @@ func (dao *BotDaoImplGorm) Get(ID int64) (*types.Bot, error) {
 		return nil, err
 	}
 
-	resultingBot := &types.Bot{ID: ID}
+	resultingBot := &types.Bot{}
+	botModel.ToEntity(resultingBot)
+	return resultingBot, nil
+}
+
+func (dao *BotDaoImplGorm) GetByToken(token string) (*types.Bot, error) {
+	botModel := &database.Bot{}
+
+	if err := dao.db.Where("token = ?", token).First(botModel).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	resultingBot := &types.Bot{}
 	botModel.ToEntity(resultingBot)
 	return resultingBot, nil
 }
