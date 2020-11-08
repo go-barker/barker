@@ -46,7 +46,7 @@ export class BotDaoImplAxios implements BotDao {
         const {
             data: { data },
         } = await this.http.get(
-            U.parse('/bot-by-token/{token}').expand({ Token: token })
+            U.parse('/bot-by-token/{Token}').expand({ Token: token })
         );
         return data;
     }
