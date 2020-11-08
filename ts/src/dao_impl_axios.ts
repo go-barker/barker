@@ -89,7 +89,8 @@ export class UserDaoImplAxios implements UserDao {
         const {
             data: { data },
         } = await this.http.put(
-            U.parse('/bot/{botID}/user').expand({ botID: user.BotID })
+            U.parse('/bot/{botID}/user').expand({ botID: user.BotID }),
+            user
         );
         return data;
     }
