@@ -11,7 +11,7 @@ type Bot struct {
 	gorm.Model
 	ID              int64 `gorm:"primaryKey"`
 	Title           string
-	Token           string
+	Token           string    `gorm:"uniqueIndex"`
 	RRAccessTime    time.Time `gorm:"index"`
 	RRPossiblyEmpty bool      `gorm:"index"`
 }
