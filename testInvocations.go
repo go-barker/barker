@@ -467,7 +467,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 
 			// #region(collapsed) [take deliveries for any campaign]
 			t.Run("take deliveries for any campaign", func(t *testing.T) {
-				prepareData := func() (
+				prepareData := func(botTokenSuffix string) (
 					usersAlphaIDs []int64,
 					usersBetaIDs []int64,
 					campaignsAlphaIDs []int64,
@@ -478,12 +478,12 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 					var err error
 					botAlpha, err = botDao.Create(&types.Bot{
 						Title: "Bot Alpha",
-						Token: "bot:alpha",
+						Token: "bot:alpha" + botTokenSuffix,
 					})
 					assert.NilError(t, err)
 					botBeta, err = botDao.Create(&types.Bot{
 						Title: "Bot Beta",
-						Token: "bot:beta",
+						Token: "bot:beta" + botTokenSuffix,
 					})
 					assert.NilError(t, err)
 
@@ -560,7 +560,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 						campaignsAlphaIDs,
 						campaignsBetaIDs,
 						botAlpha,
-						botBeta := prepareData()
+						botBeta := prepareData(" one")
 					takeDeliveriesForAnyCampaign(botAlpha.ID, campaignsAlphaIDs, usersAlphaIDs)
 					takeDeliveriesForAnyCampaign(botBeta.ID, campaignsBetaIDs, usersBetaIDs)
 				}
@@ -589,7 +589,7 @@ func createIntegrationTestInvocation(t *testing.T) fx.Option {
 						campaignsAlphaIDs,
 						campaignsBetaIDs,
 						botAlpha,
-						botBeta := prepareData()
+						botBeta := prepareData(" two")
 					takeDeliveriesForSpecificUser(botAlpha.ID, usersAlphaIDs, campaignsAlphaIDs)
 					takeDeliveriesForSpecificUser(botBeta.ID, usersBetaIDs, campaignsBetaIDs)
 				}
