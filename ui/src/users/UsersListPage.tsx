@@ -1,7 +1,6 @@
 import { Grid, TableCell } from '@material-ui/core';
 import { PaginatorResponse, User } from 'barker-api';
 import React, { FC } from 'react';
-import { Link } from 'react-router-dom';
 import { createListView } from '../createListView';
 
 export interface UsersListPageProps {
@@ -24,11 +23,23 @@ const UsersListView = createListView<User>({
         <>
             <TableCell>{item.TelegramID}</TableCell>
             <TableCell>
-                <Link to={`/bots/${item.BotID}/users/${item.TelegramID}`}>
-                    {item.DisplayName || '<no>'}
-                </Link>
+                {/* <Link to={`/bots/${item.BotID}/users/${item.TelegramID}`}> */}
+                {item.DisplayName || '<no>'}
+                {/* </Link> */}
             </TableCell>
-            <TableCell>{item.UserName || '<no>'}</TableCell>
+            <TableCell>
+                {item.UserName ? (
+                    <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://t.me/${item.UserName}`}
+                    >
+                        @{item.UserName}
+                    </a>
+                ) : (
+                    '<no>'
+                )}
+            </TableCell>
             <TableCell>{item.FirstName || '<no>'}</TableCell>
             <TableCell>{item.LastName || '<no>'}</TableCell>
         </>

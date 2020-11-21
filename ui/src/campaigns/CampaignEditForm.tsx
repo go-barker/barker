@@ -39,6 +39,7 @@ const CampaignEditForm: FC<CampaignEditFormProps> = ({
                             <Grid item xs={12}>
                                 <Field
                                     component={TextField}
+                                    multiline
                                     label="Message"
                                     name="Message"
                                     variant="outlined"

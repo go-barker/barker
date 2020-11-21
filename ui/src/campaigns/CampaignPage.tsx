@@ -1,4 +1,4 @@
-import { Grid, makeStyles, Paper } from '@material-ui/core';
+import { Grid, makeStyles, Paper, Typography } from '@material-ui/core';
 import { Bot, Campaign } from 'barker-api';
 import React, { FC } from 'react';
 import BotAppBar from '../bots/BotAppBar';
@@ -44,7 +44,7 @@ export const CampaignPage: FC<CampaignPageProps> = ({
             />
 
             <Paper className={classes.paper}>
-                <Grid container>
+                <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                         <CampaignEditForm
                             onSubmit={onSubmit}
@@ -53,6 +53,9 @@ export const CampaignPage: FC<CampaignPageProps> = ({
                     </Grid>
                     {!isNew && campaign.BotID && campaign.ID && (
                         <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle1">
+                                Progress
+                            </Typography>
                             <CampaignStatWidget
                                 botID={campaign.BotID}
                                 campaignID={campaign.ID}
